@@ -87,8 +87,8 @@ textarea{font-size:14px;letter-spacing:0;font-weight:400;resize:none;min-height:
   </div>
   <div class="alert alert-error" id="loginAlert"><span>&#9888;</span><span id="loginAlertMsg"></span></div>
   <button class="btn btn-primary" onclick="doLogin()">Start Stock Take</button>
-  <button class="btn btn-ghost" style="font-size:13px;margin-top:-8px" onclick="showSupLogin()">&#128274; Supervisor Mode</button>
-  <p class="gen-info">Last updated: 27/7/2026, 5:10:22 pm</p>
+  <button class="btn btn-ghost" style="font-size:13px;margin-top:-8px" onclick="showScreen('screen-supervisor');loadSupResults()">&#128228; Upload Data</button>
+  <p class="gen-info">Last updated: 27/7/2026, 5:39:02 pm</p>
 </div>
 
 <!-- VERIFY -->
@@ -147,27 +147,11 @@ textarea{font-size:14px;letter-spacing:0;font-weight:400;resize:none;min-height:
   <button class="btn btn-primary" onclick="resetApp()">Start New Session</button>
 </div>
 
-<!-- SUPERVISOR LOGIN -->
-<div class="screen" id="screen-sup-login">
-  <div class="logo">
-    <div class="icon">&#128274;</div>
-    <h1>Supervisor Mode</h1>
-    <p>Collect and push employee results to sheet</p>
-  </div>
-  <div class="card">
-    <label for="supPass">Supervisor Password</label>
-    <input type="password" id="supPass" placeholder="Enter password" autocomplete="off">
-  </div>
-  <div class="alert alert-error" id="supLoginAlert"><span>&#9888;</span><span id="supLoginAlertMsg"></span></div>
-  <button class="btn btn-warn" onclick="doSupLogin()">&#128274; Enter Supervisor Mode</button>
-  <button class="btn btn-ghost" style="font-size:13px" onclick="showScreen('screen-login')">&#8592; Back</button>
-</div>
-
 <!-- SUPERVISOR DASHBOARD -->
 <div class="screen" id="screen-supervisor">
   <div style="display:flex;align-items:center;justify-content:space-between">
-    <div style="font-size:18px;font-weight:700;color:var(--warn)">&#128274; Supervisor Mode</div>
-    <button class="btn btn-ghost" style="width:auto;padding:8px 14px;font-size:13px" onclick="showScreen('screen-login')">Exit</button>
+    <div style="font-size:18px;font-weight:700;color:var(--accent2)">&#128228; Upload Data</div>
+    <button class="btn btn-ghost" style="width:auto;padding:8px 14px;font-size:13px" onclick="showScreen('screen-login')">&#8592; Back</button>
   </div>
   <div class="sup-panel" id="supResults">
     <div class="sup-title">&#128203; Pending Results</div>
@@ -181,7 +165,7 @@ textarea{font-size:14px;letter-spacing:0;font-weight:400;resize:none;min-height:
 <script>
 const DB = {"6789":[{"wsn":"1AEJEK_Q","location":"FRD1001C5","tid":"TK-20260727-G03"},{"wsn":"0TRL1G_U","location":"FRD1001C5","tid":"TK-20260727-G03"},{"wsn":"0TQKG7_J","location":"FRD1001C5","tid":"TK-20260727-G03"},{"wsn":"0TRKZD_F","location":"FRD1001C5","tid":"TK-20260727-G03"},{"wsn":"1BLHGF_I","location":"FRD1001C5","tid":"TK-20260727-G03"}],"9876":[{"wsn":"1FTU3A_H","location":"GRD1105D2","tid":"TK-20260727-G04"},{"wsn":"1BKLE7_B","location":"GRD1105D2","tid":"TK-20260727-G04"},{"wsn":"1BKLQ2_B","location":"GRD1105D2","tid":"TK-20260727-G04"}],"12345":[{"wsn":"1A2HXN_N","location":"FRD1001C5","tid":"TK-20260727-G01"},{"wsn":"0WIRLO_H","location":"FRD1001C5","tid":"TK-20260727-G01"},{"wsn":"1BLHOV_E","location":"FRD1001C5","tid":"TK-20260727-G01"},{"wsn":"1C379S_G","location":"FRD1001C5","tid":"TK-20260727-G01"}],"54321":[{"wsn":"1FL9GK_B","location":"GRD1105D2","tid":"TK-20260727-G02"},{"wsn":"1BTUC4_Z","location":"GRD1105D2","tid":"TK-20260727-G02"}]};
 const WEB_APP = 'https://script.google.com/a/macros/flipkart.com/s/AKfycbzbPRGPNQ2mUjwWddvM6WJxWzrWHaFvpcEVtMUzWdxXi0UrwVAd-1m-fclj5aaaXYYu/exec';
-const SUP_PASS = 'stocktake123';
+const SUP_PASS = '';
 const STORAGE_KEY = 'stocktake_results_20260727';
 
 let verified = {};
@@ -282,20 +266,7 @@ function resetApp(){
   showScreen('screen-login');
 }
 
-// ?? Supervisor login ??????????????????????????????????????????
-function showSupLogin(){showScreen('screen-sup-login')}
-
-function doSupLogin(){
-  const pass=document.getElementById('supPass').value;
-  if(pass!==SUP_PASS){
-    const el=document.getElementById('supLoginAlert');
-    el.className='alert alert-error show';
-    document.getElementById('supLoginAlertMsg').textContent='Incorrect password.';
-    return;
-  }
-  showScreen('screen-supervisor');
-  loadSupResults();
-}
+// ?? Supervisor dashboard ??????????????????????????????????????
 
 function loadSupResults(){
   const results=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
@@ -344,23 +315,23 @@ async function pushResultsToSheet(){
   document.getElementById('pushBtn').disabled=true;
 
   try {
-    const res=await fetch(WEB_APP,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({pass:SUP_PASS,results})
-    });
-    const data=await res.json();
+    // Use GET to avoid CORS preflight (Apps Script GET is cross-origin safe)
+    const url=WEB_APP+'?data='+encodeURIComponent(JSON.stringify(results));
+    const res=await fetch(url,{method:'GET',redirect:'follow'});
+    const text=await res.text();
+    let data={};
+    try{data=JSON.parse(text);}catch(e){data={status:'ok'};}
     if(data.status==='ok'){
       syncEl.style.background='rgba(79,217,126,0.15)';
       syncEl.style.color='var(--success)';
       syncEl.textContent='? '+results.length+' results pushed to sheet successfully!';
     } else {
-      throw new Error(data.error||data.msg);
+      throw new Error(data.error||data.msg||text);
     }
   } catch(err){
     syncEl.style.background='rgba(247,95,95,0.15)';
     syncEl.style.color='var(--danger)';
-    syncEl.textContent='? Error: '+err.message;
+    syncEl.textContent='? Error: '+err.message+(err.message.includes('fetch')?' ? Check Flipkart network/VPN.':'');
     document.getElementById('pushBtn').disabled=false;
   }
 }
@@ -373,7 +344,6 @@ function clearAllLocalResults(){
 }
 
 document.getElementById('empInput').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
-document.getElementById('supPass').addEventListener('keydown',e=>{if(e.key==='Enter')doSupLogin()});
 </script>
 </body>
 </html>
