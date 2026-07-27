@@ -12,11 +12,10 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .screen.active{display:flex}
 .logo{text-align:center;padding:32px 0 8px}
 .logo .icon{width:72px;height:72px;background:linear-gradient(135deg,#4f8ef7 0%,#00d4aa 100%);border-radius:20px;display:inline-flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:12px}
-.logo h1{font-size:22px;font-weight:700}
-.logo p{color:var(--muted);font-size:13px;margin-top:4px}
+.logo h1{font-size:22px;font-weight:700}.logo p{color:var(--muted);font-size:13px;margin-top:4px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
 label{font-size:13px;color:var(--muted);display:block;margin-bottom:8px;font-weight:500;text-transform:uppercase;letter-spacing:0.5px}
-input[type="text"],textarea{width:100%;background:var(--bg);border:2px solid var(--border);border-radius:10px;color:var(--text);font-size:18px;padding:14px 16px;outline:none;transition:border-color 0.2s;font-weight:600;letter-spacing:1px;font-family:inherit}
+input[type="text"],input[type="password"],textarea{width:100%;background:var(--bg);border:2px solid var(--border);border-radius:10px;color:var(--text);font-size:18px;padding:14px 16px;outline:none;transition:border-color 0.2s;font-weight:600;letter-spacing:1px;font-family:inherit}
 input:focus,textarea:focus{border-color:var(--accent)}
 textarea{font-size:14px;letter-spacing:0;font-weight:400;resize:none;min-height:80px}
 .btn{width:100%;padding:16px;border-radius:12px;border:none;font-size:17px;font-weight:700;cursor:pointer;transition:opacity 0.15s,transform 0.1s}
@@ -25,6 +24,7 @@ textarea{font-size:14px;letter-spacing:0;font-weight:400;resize:none;min-height:
 .btn-success{background:var(--success);color:#0f0f1a}
 .btn-danger{background:var(--danger);color:#fff}
 .btn-ghost{background:var(--surface2);color:var(--text)}
+.btn-warn{background:var(--warn);color:#0f0f1a}
 .btn:disabled{opacity:0.4;cursor:not-allowed}
 .progress-wrap{background:var(--surface2);border-radius:8px;height:10px;overflow:hidden}
 .progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:8px;transition:width 0.5s ease}
@@ -34,7 +34,7 @@ textarea{font-size:14px;letter-spacing:0;font-weight:400;resize:none;min-height:
 .pick-card{background:var(--surface2);border:2px solid var(--accent);border-radius:var(--radius);padding:24px 20px;text-align:center;position:relative;overflow:hidden}
 .pick-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
 .pick-seq{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
-.pick-location{background:var(--bg);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+.pick-location{background:var(--bg);border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
 .loc-icon{font-size:28px}.loc-text{text-align:left}
 .loc-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px}
 .loc-val{font-size:26px;font-weight:800;color:var(--warn);letter-spacing:2px;font-family:'Courier New',monospace}
@@ -65,7 +65,11 @@ textarea{font-size:14px;letter-spacing:0;font-weight:400;resize:none;min-height:
 .tag{padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700}
 .tag-done{background:rgba(79,217,126,0.2);color:var(--success)}
 .tag-issue{background:rgba(247,95,95,0.2);color:var(--danger)}
-.tag-skip{background:rgba(247,163,79,0.2);color:var(--warn)}
+.sync-msg{font-size:13px;font-weight:600;text-align:center;padding:10px;border-radius:10px;display:none}
+.sup-panel{background:var(--surface);border:2px solid var(--warn);border-radius:var(--radius);padding:20px}
+.sup-title{font-size:16px;font-weight:700;color:var(--warn);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.emp-block{background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:10px}
+.emp-block-title{font-size:12px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
 </style>
 </head>
 <body>
@@ -82,8 +86,9 @@ textarea{font-size:14px;letter-spacing:0;font-weight:400;resize:none;min-height:
     <input type="text" id="empInput" placeholder="Enter Employee ID" autocomplete="off" spellcheck="false">
   </div>
   <div class="alert alert-error" id="loginAlert"><span>&#9888;</span><span id="loginAlertMsg"></span></div>
-  <button class="btn btn-primary" onclick="doLogin()">Start Stock Take Session</button>
-  <p class="gen-info">Last updated: 27/7/2026, 2:24:52 pm &nbsp;|&nbsp; Date: 20260727</p>
+  <button class="btn btn-primary" onclick="doLogin()">Start Stock Take</button>
+  <button class="btn btn-ghost" style="font-size:13px;margin-top:-8px" onclick="showSupLogin()">&#128274; Supervisor Mode</button>
+  <p class="gen-info">Last updated: 27/7/2026, 5:10:22 pm</p>
 </div>
 
 <!-- VERIFY -->
@@ -99,7 +104,7 @@ textarea{font-size:14px;letter-spacing:0;font-weight:400;resize:none;min-height:
     </div>
     <div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
   </div>
-  <div class="pick-card" id="pickCard">
+  <div class="pick-card">
     <div class="pick-seq" id="pickSeq">WSN 1 OF 0</div>
     <div class="pick-location">
       <div class="loc-icon">&#128205;</div>
@@ -108,7 +113,7 @@ textarea{font-size:14px;letter-spacing:0;font-weight:400;resize:none;min-height:
         <div class="loc-val" id="pickLocation">-</div>
       </div>
     </div>
-    <div class="tid-badge" id="tidBadge">TK---------</div>
+    <div class="tid-badge" id="tidBadge">-</div>
     <div class="pick-wsn-label">Verify WSN</div>
     <div class="pick-wsn-val" id="pickWSN">-</div>
     <div class="scan-wrap">
@@ -116,8 +121,7 @@ textarea{font-size:14px;letter-spacing:0;font-weight:400;resize:none;min-height:
       <button class="scan-btn" onclick="confirmScan()">&#8594;</button>
     </div>
   </div>
-  <div class="alert" id="pickAlert"><span id="pickAlertIcon">&#9888;</span><span id="pickAlertMsg"></span></div>
-
+  <div class="alert" id="pickAlert"><span id="pickAlertIcon"></span><span id="pickAlertMsg"></span></div>
   <div class="remark-section" id="remarkSection">
     <label>Remark (describe the issue)</label>
     <textarea id="remarkInput" placeholder="e.g. WSN not found, damaged, wrong location..."></textarea>
@@ -126,158 +130,250 @@ textarea{font-size:14px;letter-spacing:0;font-weight:400;resize:none;min-height:
       <button class="btn btn-ghost" style="flex:1" onclick="cancelIssue()">Cancel</button>
     </div>
   </div>
-
   <div style="display:flex;gap:10px">
     <button class="btn btn-success" style="flex:2" onclick="confirmScan()">&#10003; Done</button>
     <button class="btn btn-ghost" style="flex:1;font-size:13px" onclick="showRemarkSection()">&#9888; Issue</button>
   </div>
 </div>
 
-<!-- COMPLETE -->
+<!-- EMPLOYEE DONE -->
 <div class="screen" id="screen-done">
   <div class="done-anim">&#10024;</div>
   <div class="done-title">Stock Take Complete!</div>
-  <div class="done-sub" id="doneSub">Session complete</div>
+  <div class="done-sub" id="doneSub"></div>
+  <div class="sync-msg" id="syncMsg"></div>
   <div class="divider"></div>
   <div class="card" id="doneStats"></div>
   <button class="btn btn-primary" onclick="resetApp()">Start New Session</button>
 </div>
 
+<!-- SUPERVISOR LOGIN -->
+<div class="screen" id="screen-sup-login">
+  <div class="logo">
+    <div class="icon">&#128274;</div>
+    <h1>Supervisor Mode</h1>
+    <p>Collect and push employee results to sheet</p>
+  </div>
+  <div class="card">
+    <label for="supPass">Supervisor Password</label>
+    <input type="password" id="supPass" placeholder="Enter password" autocomplete="off">
+  </div>
+  <div class="alert alert-error" id="supLoginAlert"><span>&#9888;</span><span id="supLoginAlertMsg"></span></div>
+  <button class="btn btn-warn" onclick="doSupLogin()">&#128274; Enter Supervisor Mode</button>
+  <button class="btn btn-ghost" style="font-size:13px" onclick="showScreen('screen-login')">&#8592; Back</button>
+</div>
+
+<!-- SUPERVISOR DASHBOARD -->
+<div class="screen" id="screen-supervisor">
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <div style="font-size:18px;font-weight:700;color:var(--warn)">&#128274; Supervisor Mode</div>
+    <button class="btn btn-ghost" style="width:auto;padding:8px 14px;font-size:13px" onclick="showScreen('screen-login')">Exit</button>
+  </div>
+  <div class="sup-panel" id="supResults">
+    <div class="sup-title">&#128203; Pending Results</div>
+    <div id="supResultsBody" style="color:var(--muted);font-size:14px">Loading...</div>
+  </div>
+  <div class="sync-msg" id="supSyncMsg"></div>
+  <button class="btn btn-warn" id="pushBtn" onclick="pushResultsToSheet()" disabled>&#128228; Push Results to Sheet</button>
+  <button class="btn btn-ghost" style="font-size:13px" onclick="clearAllLocalResults()">&#128465; Clear All Local Results</button>
+</div>
+
 <script>
-const DB = {"12345":[{"wsn":"1A2HXN_N","location":"FRD1001C5","tid":"TK-20260727-G01"},{"wsn":"0WIRLO_H","location":"FRD1001C5","tid":"TK-20260727-G01"},{"wsn":"1BLHOV_E","location":"FRD1001C5","tid":"TK-20260727-G01"},{"wsn":"1C379S_G","location":"FRD1001C5","tid":"TK-20260727-G01"}],"54321":[{"wsn":"1FL9GK_B","location":"GRD1105D2","tid":"TK-20260727-G02"},{"wsn":"1BTUC4_Z","location":"GRD1105D2","tid":"TK-20260727-G02"}]};
+const DB = {"6789":[{"wsn":"1AEJEK_Q","location":"FRD1001C5","tid":"TK-20260727-G03"},{"wsn":"0TRL1G_U","location":"FRD1001C5","tid":"TK-20260727-G03"},{"wsn":"0TQKG7_J","location":"FRD1001C5","tid":"TK-20260727-G03"},{"wsn":"0TRKZD_F","location":"FRD1001C5","tid":"TK-20260727-G03"},{"wsn":"1BLHGF_I","location":"FRD1001C5","tid":"TK-20260727-G03"}],"9876":[{"wsn":"1FTU3A_H","location":"GRD1105D2","tid":"TK-20260727-G04"},{"wsn":"1BKLE7_B","location":"GRD1105D2","tid":"TK-20260727-G04"},{"wsn":"1BKLQ2_B","location":"GRD1105D2","tid":"TK-20260727-G04"}],"12345":[{"wsn":"1A2HXN_N","location":"FRD1001C5","tid":"TK-20260727-G01"},{"wsn":"0WIRLO_H","location":"FRD1001C5","tid":"TK-20260727-G01"},{"wsn":"1BLHOV_E","location":"FRD1001C5","tid":"TK-20260727-G01"},{"wsn":"1C379S_G","location":"FRD1001C5","tid":"TK-20260727-G01"}],"54321":[{"wsn":"1FL9GK_B","location":"GRD1105D2","tid":"TK-20260727-G02"},{"wsn":"1BTUC4_Z","location":"GRD1105D2","tid":"TK-20260727-G02"}]};
+const WEB_APP = 'https://script.google.com/a/macros/flipkart.com/s/AKfycbzbPRGPNQ2mUjwWddvM6WJxWzrWHaFvpcEVtMUzWdxXi0UrwVAd-1m-fclj5aaaXYYu/exec';
+const SUP_PASS = 'stocktake123';
+const STORAGE_KEY = 'stocktake_results_20260727';
+
 let verified = {};
 let state = {empId:'',total:0,doneCount:0,issueCount:0,currentWSN:'',currentLocation:'',currentTID:'',startTime:null,results:[]};
 
-function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active')}
-
-function showAlert(msg, type){
-  const el = document.getElementById('pickAlert');
-  el.className = 'alert alert-'+type+' show';
-  document.getElementById('pickAlertIcon').textContent = type==='error' ? '?' : type==='success' ? '?' : '!';
-  document.getElementById('pickAlertMsg').textContent = msg;
-}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function showAlert(msg,type){const el=document.getElementById('pickAlert');el.className='alert alert-'+type+' show';document.getElementById('pickAlertIcon').textContent=type==='error'?'?':type==='success'?'?':'!';document.getElementById('pickAlertMsg').textContent=msg}
 function hideAlert(){document.getElementById('pickAlert').classList.remove('show')}
-function updateProgress(){
-  const pct = state.total > 0 ? ((state.doneCount + state.issueCount) / state.total * 100) : 0;
-  document.getElementById('progressBar').style.width = pct + '%';
-  document.getElementById('progressLabel').textContent = (state.doneCount + state.issueCount) + ' / ' + state.total;
-  document.getElementById('chipDone').textContent = state.doneCount;
-  document.getElementById('chipIssue').textContent = state.issueCount;
-}
+function updateProgress(){const pct=state.total>0?((state.doneCount+state.issueCount)/state.total*100):0;document.getElementById('progressBar').style.width=pct+'%';document.getElementById('progressLabel').textContent=(state.doneCount+state.issueCount)+' / '+state.total;document.getElementById('chipDone').textContent=state.doneCount;document.getElementById('chipIssue').textContent=state.issueCount}
 
+// ?? Employee login ????????????????????????????????????????????
 function doLogin(){
-  const empId = document.getElementById('empInput').value.trim();
-  if(!empId){showLoginAlert('Please enter your Employee ID');return}
-  const list = DB[empId];
-  if(!list||list.length===0){showLoginAlert('No WSNs assigned to Employee: '+empId);return}
-  state = {empId, total:list.length, doneCount:0, issueCount:0, currentWSN:'', currentLocation:'', currentTID:'', startTime:Date.now(), results:[]};
-  verified = {};
-  document.getElementById('chipEmp').textContent = empId;
-  updateProgress();
-  showScreen('verify');
-  loadNext();
+  const empId=document.getElementById('empInput').value.trim();
+  if(!empId){showLoginErr('Please enter your Employee ID');return}
+  const list=DB[empId];
+  if(!list||!list.length){showLoginErr('No WSNs assigned to: '+empId);return}
+  state={empId,total:list.length,doneCount:0,issueCount:0,currentWSN:'',currentLocation:'',currentTID:'',startTime:Date.now(),results:[]};
+  verified={};
+  document.getElementById('chipEmp').textContent=empId;
+  updateProgress();showScreen('screen-verify');loadNext();
 }
-
-function showLoginAlert(msg){
-  const el = document.getElementById('loginAlert');
-  el.className = 'alert alert-error show';
-  document.getElementById('loginAlertMsg').textContent = msg;
-}
+function showLoginErr(msg){const el=document.getElementById('loginAlert');el.className='alert alert-error show';document.getElementById('loginAlertMsg').textContent=msg}
 
 function loadNext(){
-  const list = DB[state.empId];
-  const next = list.find(i => !verified[i.wsn]);
+  const list=DB[state.empId];
+  const next=list.find(i=>!verified[i.wsn]);
   if(!next){showDone();return}
-  state.currentWSN = next.wsn;
-  state.currentLocation = next.location;
-  state.currentTID = next.tid;
-  document.getElementById('pickLocation').textContent = next.location;
-  document.getElementById('pickWSN').textContent = next.wsn;
-  document.getElementById('tidBadge').textContent = next.tid;
-  document.getElementById('pickSeq').textContent = 'WSN ' + (state.doneCount + state.issueCount + 1) + ' OF ' + state.total;
-  document.getElementById('scanInput').value = '';
+  state.currentWSN=next.wsn;state.currentLocation=next.location;state.currentTID=next.tid;
+  document.getElementById('pickLocation').textContent=next.location;
+  document.getElementById('pickWSN').textContent=next.wsn;
+  document.getElementById('tidBadge').textContent=next.tid;
+  document.getElementById('pickSeq').textContent='WSN '+(state.doneCount+state.issueCount+1)+' OF '+state.total;
+  document.getElementById('scanInput').value='';
   document.getElementById('scanInput').focus();
-  hideAlert();
-  hideRemarkSection();
+  hideAlert();hideRemarkSection();
 }
 
 function confirmScan(){
-  const scanned = document.getElementById('scanInput').value.trim().toUpperCase();
-  const expected = state.currentWSN.toUpperCase();
-  if(!scanned){showAlert('Scan or type the WSN to verify','warn');return}
-  if(scanned !== expected){showAlert('Wrong WSN! Expected: ' + state.currentWSN,'error');document.getElementById('scanInput').value='';document.getElementById('scanInput').focus();return}
-  markDone(state.currentWSN, state.currentLocation, state.currentTID);
-}
-
-function markDone(wsn, loc, tid){
-  verified[wsn] = 'done';
+  const scanned=document.getElementById('scanInput').value.trim().toUpperCase();
+  const expected=state.currentWSN.toUpperCase();
+  if(!scanned){showAlert('Scan or type the WSN','warn');return}
+  if(scanned!==expected){showAlert('Wrong WSN! Expected: '+state.currentWSN,'error');document.getElementById('scanInput').value='';document.getElementById('scanInput').focus();return}
+  verified[state.currentWSN]='done';
   state.doneCount++;
-  state.results.push({wsn, location:loc, tid, status:'Done', remark:'', time:new Date().toLocaleTimeString('en-IN')});
-  updateProgress();
-  showAlert('? WSN verified ? ' + wsn, 'success');
-  setTimeout(loadNext, 700);
+  state.results.push({wsn:state.currentWSN,status:'Done',remark:'',tid:state.currentTID,empId:state.empId,time:new Date().toLocaleTimeString('en-IN')});
+  updateProgress();showAlert('? Verified ? '+state.currentWSN,'success');
+  setTimeout(loadNext,700);
 }
 
-function showRemarkSection(){
-  document.getElementById('remarkSection').classList.add('show');
-  document.getElementById('remarkInput').value = '';
-  document.getElementById('remarkInput').focus();
-}
+function showRemarkSection(){document.getElementById('remarkSection').classList.add('show');document.getElementById('remarkInput').value='';document.getElementById('remarkInput').focus()}
 function hideRemarkSection(){document.getElementById('remarkSection').classList.remove('show')}
 function cancelIssue(){hideRemarkSection();document.getElementById('scanInput').focus()}
 
 function confirmIssue(){
-  const remark = document.getElementById('remarkInput').value.trim();
-  if(!remark){alert('Please enter a remark describing the issue.');return}
-  const wsn = state.currentWSN, loc = state.currentLocation, tid = state.currentTID;
-  verified[wsn] = 'issue';
+  const remark=document.getElementById('remarkInput').value.trim();
+  if(!remark){alert('Please enter a remark.');return}
+  verified[state.currentWSN]='issue';
   state.issueCount++;
-  state.results.push({wsn, location:loc, tid, status:'Issue', remark, time:new Date().toLocaleTimeString('en-IN')});
-  updateProgress();
-  hideRemarkSection();
-  showAlert('Issue recorded for ' + wsn, 'warn');
-  setTimeout(loadNext, 700);
+  state.results.push({wsn:state.currentWSN,status:'Issue',remark,tid:state.currentTID,empId:state.empId,time:new Date().toLocaleTimeString('en-IN')});
+  updateProgress();hideRemarkSection();showAlert('Issue recorded ? '+state.currentWSN,'warn');
+  setTimeout(loadNext,700);
 }
 
 function showDone(){
-  const elapsed = Math.round((Date.now() - state.startTime) / 1000);
-  const mins = Math.floor(elapsed/60), secs = elapsed % 60;
-  document.getElementById('doneSub').textContent = 'Employee: ' + state.empId;
+  const elapsed=Math.round((Date.now()-state.startTime)/1000);
+  const mins=Math.floor(elapsed/60),secs=elapsed%60;
+  document.getElementById('doneSub').textContent='Employee: '+state.empId;
+  let rows=state.results.map(r=>'<div class="result-row"><span style="font-family:monospace;font-size:12px">'+r.wsn+'</span><span style="font-size:11px;color:var(--muted)">'+r.tid+'</span><span class="tag tag-'+r.status.toLowerCase()+'">'+r.status+'</span></div>').join('');
+  document.getElementById('doneStats').innerHTML=
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;margin-bottom:16px">'+
+    '<div><div style="font-size:28px;font-weight:800;color:var(--success)">'+state.doneCount+'</div><div style="font-size:11px;color:var(--muted)">Done</div></div>'+
+    '<div><div style="font-size:28px;font-weight:800;color:var(--danger)">'+state.issueCount+'</div><div style="font-size:11px;color:var(--muted)">Issues</div></div>'+
+    '<div><div style="font-size:28px;font-weight:800;color:var(--accent)">'+mins+'m '+secs+'s</div><div style="font-size:11px;color:var(--muted)">Time</div></div>'+
+    '</div>'+rows;
+  showScreen('screen-done');
 
-  let rows = state.results.map(r =>
-    '<div class="result-row">' +
-    '<span style="font-family:monospace;font-size:12px">' + r.wsn + '</span>' +
-    '<span style="font-size:11px;color:var(--muted)">' + r.tid + '</span>' +
-    '<span class="tag tag-' + r.status.toLowerCase() + '">' + r.status + '</span>' +
-    '</div>'
-  ).join('');
+  // Save results to localStorage ? supervisor collects from here
+  const existing = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+  const merged = [...existing];
+  state.results.forEach(r=>{
+    const idx=merged.findIndex(e=>e.wsn.toUpperCase()===r.wsn.toUpperCase());
+    if(idx>=0) merged[idx]=r; else merged.push(r);
+  });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
 
-  document.getElementById('doneStats').innerHTML =
-    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;margin-bottom:16px">' +
-    '<div><div style="font-size:28px;font-weight:800;color:var(--success)">' + state.doneCount + '</div><div style="font-size:11px;color:var(--muted)">Done</div></div>' +
-    '<div><div style="font-size:28px;font-weight:800;color:var(--danger)">' + state.issueCount + '</div><div style="font-size:11px;color:var(--muted)">Issues</div></div>' +
-    '<div><div style="font-size:28px;font-weight:800;color:var(--accent)">' + mins + 'm ' + secs + 's</div><div style="font-size:11px;color:var(--muted)">Time</div></div>' +
-    '</div>' + rows;
-
-  showScreen('done');
-  setTimeout(() => alert(
-    'STOCK TAKE COMPLETE!\n\n' +
-    'Employee : ' + state.empId + '\n' +
-    'Done     : ' + state.doneCount + ' WSNs\n' +
-    'Issues   : ' + state.issueCount + ' WSNs\n' +
-    'Time     : ' + mins + 'm ' + secs + 's'
-  ), 400);
+  const syncEl=document.getElementById('syncMsg');
+  syncEl.style.display='block';
+  syncEl.style.background='rgba(79,217,126,0.15)';
+  syncEl.style.color='var(--success)';
+  syncEl.textContent='? Results saved locally. Supervisor will collect from this device.';
 }
 
 function resetApp(){
-  state = {empId:'',total:0,doneCount:0,issueCount:0,currentWSN:'',currentLocation:'',currentTID:'',startTime:null,results:[]};
-  verified = {};
-  document.getElementById('empInput').value = '';
+  state={empId:'',total:0,doneCount:0,issueCount:0,currentWSN:'',currentLocation:'',currentTID:'',startTime:null,results:[]};
+  verified={};
+  document.getElementById('empInput').value='';
   document.getElementById('loginAlert').classList.remove('show');
-  showScreen('login');
+  showScreen('screen-login');
 }
 
-document.getElementById('empInput').addEventListener('keydown', e => { if(e.key==='Enter') doLogin() });
+// ?? Supervisor login ??????????????????????????????????????????
+function showSupLogin(){showScreen('screen-sup-login')}
+
+function doSupLogin(){
+  const pass=document.getElementById('supPass').value;
+  if(pass!==SUP_PASS){
+    const el=document.getElementById('supLoginAlert');
+    el.className='alert alert-error show';
+    document.getElementById('supLoginAlertMsg').textContent='Incorrect password.';
+    return;
+  }
+  showScreen('screen-supervisor');
+  loadSupResults();
+}
+
+function loadSupResults(){
+  const results=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+  const body=document.getElementById('supResultsBody');
+  const pushBtn=document.getElementById('pushBtn');
+
+  if(!results.length){
+    body.innerHTML='<div style="color:var(--muted);font-size:14px;text-align:center;padding:20px 0">No results collected yet.<br>Employees must complete stock take on their HHD first.</div>';
+    pushBtn.disabled=true;
+    return;
+  }
+
+  // Group by employee
+  const byEmp={};
+  results.forEach(r=>{
+    if(!byEmp[r.empId]) byEmp[r.empId]=[];
+    byEmp[r.empId].push(r);
+  });
+
+  let html='';
+  Object.keys(byEmp).forEach(emp=>{
+    const items=byEmp[emp];
+    const done=items.filter(r=>r.status==='Done').length;
+    const issues=items.filter(r=>r.status==='Issue').length;
+    html+='<div class="emp-block">'+
+      '<div class="emp-block-title">Employee: '+emp+' &nbsp;|&nbsp; ? '+done+' Done &nbsp; ? '+issues+' Issues</div>'+
+      items.map(r=>'<div class="result-row"><span style="font-family:monospace;font-size:12px">'+r.wsn+'</span>'+
+        '<span style="font-size:11px;color:var(--muted)">'+r.tid+'</span>'+
+        '<span class="tag tag-'+r.status.toLowerCase()+'">'+r.status+'</span></div>').join('')+
+      '</div>';
+  });
+
+  body.innerHTML=html+'<div style="font-size:12px;color:var(--muted);margin-top:8px">Total: '+results.length+' WSNs from '+Object.keys(byEmp).length+' employee(s)</div>';
+  pushBtn.disabled=false;
+}
+
+async function pushResultsToSheet(){
+  const results=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+  if(!results.length){alert('No results to push.');return}
+
+  const syncEl=document.getElementById('supSyncMsg');
+  syncEl.style.display='block';
+  syncEl.style.background='rgba(247,163,79,0.15)';
+  syncEl.style.color='var(--warn)';
+  syncEl.textContent='? Pushing results to sheet...';
+  document.getElementById('pushBtn').disabled=true;
+
+  try {
+    const res=await fetch(WEB_APP,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({pass:SUP_PASS,results})
+    });
+    const data=await res.json();
+    if(data.status==='ok'){
+      syncEl.style.background='rgba(79,217,126,0.15)';
+      syncEl.style.color='var(--success)';
+      syncEl.textContent='? '+results.length+' results pushed to sheet successfully!';
+    } else {
+      throw new Error(data.error||data.msg);
+    }
+  } catch(err){
+    syncEl.style.background='rgba(247,95,95,0.15)';
+    syncEl.style.color='var(--danger)';
+    syncEl.textContent='? Error: '+err.message;
+    document.getElementById('pushBtn').disabled=false;
+  }
+}
+
+function clearAllLocalResults(){
+  if(!confirm('Clear all locally saved results for today?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  loadSupResults();
+  document.getElementById('supSyncMsg').style.display='none';
+}
+
+document.getElementById('empInput').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+document.getElementById('supPass').addEventListener('keydown',e=>{if(e.key==='Enter')doSupLogin()});
 </script>
 </body>
 </html>
