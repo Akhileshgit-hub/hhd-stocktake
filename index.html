@@ -88,7 +88,7 @@ textarea{font-size:14px;letter-spacing:0;font-weight:400;resize:none;min-height:
   <div class="alert alert-error" id="loginAlert"><span>&#9888;</span><span id="loginAlertMsg"></span></div>
   <button class="btn btn-primary" onclick="doLogin()">Start Stock Take</button>
   <button class="btn btn-ghost" style="font-size:13px;margin-top:-8px" onclick="showScreen('screen-supervisor');loadSupResults()">&#128228; Upload Data</button>
-  <p class="gen-info">Last updated: 27/7/2026, 5:53:27 pm</p>
+  <p class="gen-info">Last updated: 27/7/2026, 9:58:29 pm</p>
 </div>
 
 <!-- VERIFY -->
@@ -303,7 +303,7 @@ function loadSupResults(){
   pushBtn.disabled=false;
 }
 
-async function pushResultsToSheet(){
+function pushResultsToSheet(){
   const results=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
   if(!results.length){alert('No results to push.');return}
 
@@ -311,29 +311,43 @@ async function pushResultsToSheet(){
   syncEl.style.display='block';
   syncEl.style.background='rgba(247,163,79,0.15)';
   syncEl.style.color='var(--warn)';
-  syncEl.textContent='? Pushing results to sheet...';
+  syncEl.textContent='? Opening upload tab... Please wait.';
   document.getElementById('pushBtn').disabled=true;
 
-  try {
-    // Use GET to avoid CORS preflight (Apps Script GET is cross-origin safe)
-    const url=WEB_APP+'?data='+encodeURIComponent(JSON.stringify(results));
-    const res=await fetch(url,{method:'GET',redirect:'follow'});
-    const text=await res.text();
-    let data={};
-    try{data=JSON.parse(text);}catch(e){data={status:'ok'};}
-    if(data.status==='ok'){
+  // Open Web App URL in new tab ? uses supervisor Google session, no CORS issue
+  const url=WEB_APP+'?data='+encodeURIComponent(JSON.stringify(results));
+  const win=window.open(url,'_blank');
+
+  let attempts=0;
+  const check=setInterval(()=>{
+    attempts++;
+    try{
+      if(win&&win.document&&win.document.body){
+        const text=win.document.body.innerText||'';
+        if(text.includes('"ok"')||text.includes('written')){
+          clearInterval(check);win.close();
+          syncEl.style.background='rgba(79,217,126,0.15)';
+          syncEl.style.color='var(--success)';
+          syncEl.textContent='? '+results.length+' results pushed to sheet successfully!';
+          return;
+        }
+        if(text.includes('"error"')){
+          clearInterval(check);win.close();
+          syncEl.style.background='rgba(247,95,95,0.15)';
+          syncEl.style.color='var(--danger)';
+          syncEl.textContent='? Error. Redeploy Web App and try again.';
+          document.getElementById('pushBtn').disabled=false;
+          return;
+        }
+      }
+    }catch(e){}
+    if(attempts>30){
+      clearInterval(check);
       syncEl.style.background='rgba(79,217,126,0.15)';
       syncEl.style.color='var(--success)';
-      syncEl.textContent='? '+results.length+' results pushed to sheet successfully!';
-    } else {
-      throw new Error(data.error||data.msg||text);
+      syncEl.textContent='? Upload sent! Check sheet to confirm.';
     }
-  } catch(err){
-    syncEl.style.background='rgba(247,95,95,0.15)';
-    syncEl.style.color='var(--danger)';
-    syncEl.textContent='? Error: '+err.message+(err.message.includes('fetch')?' ? Check Flipkart network/VPN.':'');
-    document.getElementById('pushBtn').disabled=false;
-  }
+  },500);
 }
 
 function clearAllLocalResults(){
