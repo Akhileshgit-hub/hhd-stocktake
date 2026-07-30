@@ -41,7 +41,7 @@
     </div>
     <div class="alert alert-error" id="loginAlert" style="margin-top:12px;"></div>
     <button class="btn btn-primary" style="margin-top:16px;" onclick="doLogin()">Start Audit</button>
-    <p style="font-size:11px; color:#8888aa; margin-top:16px;">Published: 30/7/2026, 2:53:40 pm</p>
+    <p style="font-size:11px; color:#8888aa; margin-top:16px;">Published: 30/7/2026, 3:14:41 pm</p>
   </div>
 </div>
 
@@ -73,7 +73,7 @@
   </div>
 </div>
 
-<!-- SUMMARY & BARCODE SCREEN -->
+<!-- SUMMARY & 2D BARCODE SCREEN -->
 <div class="screen" id="screen-summary">
   <div class="card" style="text-align:center;">
     <h2 style="font-size:20px; color:#4fd97e;">Stock Take Complete!</h2>
@@ -89,7 +89,7 @@
 </div>
 
 <script>
-const EMP_DATA = {"123456":[{"tid":"TK-20260730-G01","wid":"XIQQX7F","location":"GRD1009B1","expectedCount":1,"wsns":["2Q064R_J"]},{"tid":"TK-20260730-G02","wid":"XIN6XYB","location":"GRD1009C1","expectedCount":2,"wsns":["1YUC0W_P","1VWR53_Z"]}]};
+const EMP_DATA = {"3274824":[{"tid":"TK-20260730-G01","wid":"XIHH1OT","location":"GRD1009C1","expectedCount":1,"wsns":["2O99EZ_L"]},{"tid":"TK-20260730-G01","wid":"XIKOVI2","location":"GRD1009C1","expectedCount":1,"wsns":["2QXML2_N"]},{"tid":"TK-20260730-G01","wid":"XIN0VCT","location":"GRD1009C1","expectedCount":1,"wsns":["2462BA_J"]},{"tid":"TK-20260730-G01","wid":"XIN5RCU","location":"GRD1009C1","expectedCount":1,"wsns":["299GAN_F"]},{"tid":"TK-20260730-G01","wid":"XIN6XYB","location":"GRD1009C1","expectedCount":2,"wsns":["1YUC0W_P","1VWR53_Z"]}],"3876189":[{"tid":"TK-20260730-G02","wid":"XINE33R","location":"GRD1009C1","expectedCount":1,"wsns":["22X74V_P"]},{"tid":"TK-20260730-G02","wid":"XIOZZEL","location":"GRD1009C1","expectedCount":2,"wsns":["2RD8S2_J","2P2L71_L"]},{"tid":"TK-20260730-G02","wid":"XIP9LYJ","location":"GRD1009C1","expectedCount":1,"wsns":["2Q0A12_N"]},{"tid":"TK-20260730-G02","wid":"XIMSX16","location":"GRD1009D1","expectedCount":1,"wsns":["2R73OG_Z"]}]};
 let currentEmp = '';
 let assignments = [];
 let currentIdx = 0;
