@@ -26,6 +26,8 @@
   .alert-error { background: rgba(247,95,95,0.2); border: 1px solid #f75f5f; color: #f75f5f; }
   .alert-success { background: rgba(79,217,126,0.2); border: 1px solid #4fd97e; color: #4fd97e; }
   .barcode-wrap { background: white; padding: 16px; border-radius: 12px; display: flex; justify-content: center; align-items: center; margin: 16px 0; }
+  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; padding: 20px; z-index: 999; }
+  .modal { background: #1a1a2e; border: 1px solid #2a2a45; border-radius: 14px; padding: 20px; width: 100%; max-width: 380px; text-align: center; }
 </style>
 </head>
 <body>
@@ -41,7 +43,7 @@
     </div>
     <div class="alert alert-error" id="loginAlert" style="margin-top:12px;"></div>
     <button class="btn btn-primary" style="margin-top:16px;" onclick="doLogin()">Start Audit</button>
-    <p style="font-size:11px; color:#8888aa; margin-top:16px;">Published: 30/7/2026, 3:29:29 pm</p>
+    <p style="font-size:11px; color:#8888aa; margin-top:16px;">Published: 30/7/2026, 3:33:18 pm</p>
   </div>
 </div>
 
@@ -62,13 +64,26 @@
 
   <div class="card">
     <div class="label">Scan / Enter WSN</div>
-    <input type="text" id="wsnInput" placeholder="Scan WSN..." autocomplete="off" onkeydown="if(event.key==='Enter') verifyWSN()">
+    <input type="text" id="wsnInput" placeholder="Scan WSN..." autocomplete="off" onkeydown="if(event.key==='Enter') validateScannedWSN()">
     <div class="alert alert-error" id="auditAlert" style="margin-top:10px;"></div>
     <div class="alert alert-success" id="auditSuccess" style="margin-top:10px;"></div>
     
     <div style="display:flex; gap:10px; margin-top:14px;">
-      <button class="btn btn-success" style="flex:2;" onclick="verifyWSN()">Verify WSN</button>
-      <button class="btn btn-danger" style="flex:1;" onclick="markIssue()">Issue</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="validateScannedWSN()">Submit WSN</button>
+    </div>
+  </div>
+</div>
+
+<!-- INTERACTIVE WSN ACTION MODAL -->
+<div class="modal-overlay" id="actionModal">
+  <div class="modal">
+    <h3 style="margin-bottom:8px; color:#4fd97e;">WSN Validated</h3>
+    <p style="font-size:14px; color:#8888aa; margin-bottom:14px;" id="modalWsnText">WSN: -</p>
+    <p style="font-size:13px; margin-bottom:16px;">Select condition for this specific WSN:</p>
+    
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <button class="btn btn-success" onclick="confirmWSNStatus('Done', 'Verified')">? Verify / OK</button>
+      <button class="btn btn-danger" onclick="promptIssueForWSN()">?? Report Issue</button>
     </div>
   </div>
 </div>
@@ -89,12 +104,13 @@
 </div>
 
 <script>
-const EMP_DATA = {"3274824":[{"tid":"TK-20260730-G01","wid":"XIHH1OT","location":"GRD1009C1","expectedCount":1,"wsns":["2O99EZ_L"]},{"tid":"TK-20260730-G01","wid":"XIKOVI2","location":"GRD1009C1","expectedCount":1,"wsns":["2QXML2_N"]}]};
+const EMP_DATA = {"3274824":[{"tid":"TK-20260730-G01","wid":"XIN0VCT","location":"GRD1009C1","expectedCount":1,"wsns":["2462BA_J"]},{"tid":"TK-20260730-G01","wid":"XIN5RCU","location":"GRD1009C1","expectedCount":1,"wsns":["299GAN_F"]},{"tid":"TK-20260730-G01","wid":"XIN6XYB","location":"GRD1009C1","expectedCount":2,"wsns":["1YUC0W_P","1VWR53_Z"]}]};
 let currentEmp = '';
 let assignments = [];
 let currentIdx = 0;
 let scannedWSNs = [];
 let sessionResults = [];
+let pendingValidatedWSN = '';
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -147,7 +163,7 @@ function hideAlerts() {
   document.getElementById('auditSuccess').style.display = 'none';
 }
 
-function verifyWSN() {
+function validateScannedWSN() {
   hideAlerts();
   const input = document.getElementById('wsnInput').value.trim().toUpperCase();
   const item = assignments[currentIdx];
@@ -170,12 +186,26 @@ function verifyWSN() {
     return;
   }
 
-  scannedWSNs.push(input);
-  sessionResults.push({ wsn: input, status: 'Done', remark: 'Verified' });
+  // WSN validated! Open Action Prompt before committing
+  pendingValidatedWSN = input;
+  document.getElementById('modalWsnText').textContent = 'WSN: ' + input + ' (WID: ' + item.wid + ')';
+  document.getElementById('actionModal').style.display = 'flex';
+}
+
+function confirmWSNStatus(status, remark) {
+  document.getElementById('actionModal').style.display = 'none';
+  
+  const wsn = pendingValidatedWSN;
+  const item = assignments[currentIdx];
+
+  scannedWSNs.push(wsn);
+  sessionResults.push({ wsn: wsn, status: status, remark: remark });
 
   const succ = document.getElementById('auditSuccess');
-  succ.textContent = '? Verified: ' + input;
+  succ.textContent = (status === 'Done' ? '? Verified: ' : '?? Issue Marked: ') + wsn;
   succ.style.display = 'block';
+
+  pendingValidatedWSN = '';
 
   if (scannedWSNs.length >= item.expectedCount) {
     currentIdx++;
@@ -188,18 +218,9 @@ function verifyWSN() {
   }
 }
 
-function markIssue() {
-  hideAlerts();
-  const remark = prompt('Describe Issue for WID ' + assignments[currentIdx].wid + ':') || 'Count Mismatch';
-  const item = assignments[currentIdx];
-
-  item.wsns.forEach(w => {
-    sessionResults.push({ wsn: w, status: 'Issue', remark: remark });
-  });
-
-  currentIdx++;
-  scannedWSNs = [];
-  loadCurrentItem();
+function promptIssueForWSN() {
+  const remark = prompt('Describe Issue for WSN ' + pendingValidatedWSN + ':') || 'Count Mismatch / Damaged';
+  confirmWSNStatus('Issue', remark);
 }
 
 function renderSummary() {
@@ -213,7 +234,6 @@ function renderSummary() {
     '<strong>Stock Take ID:</strong> ' + stockTakeId + '<br>' +
     '<strong>Total Items Audited:</strong> ' + sessionResults.length;
 
-  // Render High-Density 2D QR Barcode
   const qrel = document.getElementById("qrcode");
   qrel.innerHTML = "";
   new QRCode(qrel, {
