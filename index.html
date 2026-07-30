@@ -41,7 +41,7 @@
     </div>
     <div class="alert alert-error" id="loginAlert" style="margin-top:12px;"></div>
     <button class="btn btn-primary" style="margin-top:16px;" onclick="doLogin()">Start Audit</button>
-    <p style="font-size:11px; color:#8888aa; margin-top:16px;">Published: 30/7/2026, 2:33:23 pm</p>
+    <p style="font-size:11px; color:#8888aa; margin-top:16px;">Published: 30/7/2026, 2:43:48 pm</p>
   </div>
 </div>
 
@@ -89,7 +89,7 @@
 </div>
 
 <script>
-const EMP_DATA = {"12345":[{"tid":"TK-20260730-G01","wid":"XIN8H0C","location":"GRD1009B1","expectedCount":1,"wsns":["23L82L_R"]},{"tid":"TK-20260730-G01","wid":"XIQQX7F","location":"GRD1009B1","expectedCount":1,"wsns":["2Q064R_J"]},{"tid":"TK-20260730-G02","wid":"XIN6XYB","location":"GRD1009C1","expectedCount":2,"wsns":["1YUC0W_P","1VWR53_Z"]},{"tid":"TK-20260730-G02","wid":"XINE33R","location":"GRD1009C1","expectedCount":1,"wsns":["22X74V_P"]}]};
+const EMP_DATA = {"12345":[{"tid":"TK-20260730-G02","wid":"XIN6XYB","location":"GRD1009C1","expectedCount":2,"wsns":["1YUC0W_P","1VWR53_Z"]}],"123456":[{"tid":"TK-20260730-G01","wid":"XIQQX7F","location":"GRD1009B1","expectedCount":1,"wsns":["2Q064R_J"]}]};
 let currentEmp = '';
 let assignments = [];
 let currentIdx = 0;
@@ -213,13 +213,15 @@ function renderSummary() {
     '<strong>Stock Take ID:</strong> ' + stockTakeId + '<br>' +
     '<strong>Total Items Audited:</strong> ' + sessionResults.length;
 
-  // Render Code 128 Barcode
-  JsBarcode("#barcodeSvg", payload, {
-    format: "CODE128",
-    lineColor: "#000",
-    width: 2,
-    height: 80,
-    displayValue: true
+  // Clear previous barcode and render high-density QR Code
+  const container = document.getElementById('barcodeContainer');
+  container.innerHTML = '';
+  
+  new QRCode(container, {
+    text: payload,
+    width: 260,
+    height: 260,
+    correctLevel: QRCode.CorrectLevel.L // Low error correction = larger blocks = super easy to scan
   });
 }
 
