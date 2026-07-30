@@ -1,363 +1,131 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HHD Stock Take</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{--bg:#0f0f1a;--surface:#1a1a2e;--surface2:#252540;--accent:#4f8ef7;--accent2:#00d4aa;--warn:#f7a34f;--danger:#f75f5f;--success:#4fd97e;--text:#e8e8f0;--muted:#8888aa;--border:#2a2a45;--radius:14px}
-body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center}
-.screen{display:none;width:100%;max-width:480px;padding:24px 20px;flex-direction:column;gap:20px}
-.screen.active{display:flex}
-.logo{text-align:center;padding:32px 0 8px}
-.logo .icon{width:72px;height:72px;background:linear-gradient(135deg,#4f8ef7 0%,#00d4aa 100%);border-radius:20px;display:inline-flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:12px}
-.logo h1{font-size:22px;font-weight:700}.logo p{color:var(--muted);font-size:13px;margin-top:4px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
-label{font-size:13px;color:var(--muted);display:block;margin-bottom:8px;font-weight:500;text-transform:uppercase;letter-spacing:0.5px}
-input[type="text"],input[type="password"],textarea{width:100%;background:var(--bg);border:2px solid var(--border);border-radius:10px;color:var(--text);font-size:18px;padding:14px 16px;outline:none;transition:border-color 0.2s;font-weight:600;letter-spacing:1px;font-family:inherit}
-input:focus,textarea:focus{border-color:var(--accent)}
-textarea{font-size:14px;letter-spacing:0;font-weight:400;resize:none;min-height:80px}
-.btn{width:100%;padding:16px;border-radius:12px;border:none;font-size:17px;font-weight:700;cursor:pointer;transition:opacity 0.15s,transform 0.1s}
-.btn:active{transform:scale(0.97)}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-success{background:var(--success);color:#0f0f1a}
-.btn-danger{background:var(--danger);color:#fff}
-.btn-ghost{background:var(--surface2);color:var(--text)}
-.btn-warn{background:var(--warn);color:#0f0f1a}
-.btn:disabled{opacity:0.4;cursor:not-allowed}
-.progress-wrap{background:var(--surface2);border-radius:8px;height:10px;overflow:hidden}
-.progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:8px;transition:width 0.5s ease}
-.progress-info{display:flex;justify-content:space-between;align-items:center}
-.progress-info span{font-size:13px;color:var(--muted)}
-.progress-info strong{font-size:18px;font-weight:700;color:var(--accent2)}
-.pick-card{background:var(--surface2);border:2px solid var(--accent);border-radius:var(--radius);padding:24px 20px;text-align:center;position:relative;overflow:hidden}
-.pick-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
-.pick-seq{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
-.pick-location{background:var(--bg);border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
-.loc-icon{font-size:28px}.loc-text{text-align:left}
-.loc-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px}
-.loc-val{font-size:26px;font-weight:800;color:var(--warn);letter-spacing:2px;font-family:'Courier New',monospace}
-.tid-badge{background:rgba(79,142,247,0.15);border:1px solid var(--accent);border-radius:8px;padding:6px 12px;font-size:11px;color:var(--accent);font-family:'Courier New',monospace;margin-bottom:14px;display:inline-block;letter-spacing:1px}
-.pick-wsn-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
-.pick-wsn-val{font-size:32px;font-weight:900;color:var(--text);letter-spacing:3px;font-family:'Courier New',monospace;margin-bottom:16px}
-.scan-wrap{position:relative}
-.scan-wrap input{padding-right:52px;font-family:'Courier New',monospace}
-.scan-btn{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:var(--accent);border:none;border-radius:8px;width:40px;height:40px;font-size:20px;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center}
-.alert{padding:14px 16px;border-radius:10px;font-size:14px;font-weight:600;display:none;align-items:center;gap:10px}
-.alert.show{display:flex}
-.alert-error{background:rgba(247,95,95,0.15);border:1px solid var(--danger);color:var(--danger)}
-.alert-warn{background:rgba(247,163,79,0.15);border:1px solid var(--warn);color:var(--warn)}
-.alert-success{background:rgba(79,217,126,0.15);border:1px solid var(--success);color:var(--success)}
-.chips{display:flex;gap:8px;flex-wrap:wrap}
-.chip{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
-.chip strong{color:var(--text);font-size:14px}
-.remark-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;display:none}
-.remark-section.show{display:block}
-.done-anim{font-size:72px;text-align:center;padding:24px 0 12px;animation:pop 0.5s cubic-bezier(0.2,1.5,0.5,1)}
-@keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
-.done-title{font-size:26px;font-weight:800;text-align:center}
-.done-sub{font-size:14px;color:var(--muted);text-align:center}
-.divider{height:1px;background:var(--border)}
-.gen-info{font-size:11px;color:var(--muted);text-align:center}
-.result-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
-.result-row:last-child{border-bottom:none}
-.tag{padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700}
-.tag-done{background:rgba(79,217,126,0.2);color:var(--success)}
-.tag-issue{background:rgba(247,95,95,0.2);color:var(--danger)}
-.sync-msg{font-size:13px;font-weight:600;text-align:center;padding:10px;border-radius:10px;display:none}
-.sup-panel{background:var(--surface);border:2px solid var(--warn);border-radius:var(--radius);padding:20px}
-.sup-title{font-size:16px;font-weight:700;color:var(--warn);margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.emp-block{background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:10px}
-.emp-block-title{font-size:12px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
+  body { background: #0f0f1a; color: #e8e8f0; font-family: sans-serif; padding: 15px; margin: 0; }
+  .card { background: #1a1a2e; border: 1px solid #2a2a45; border-radius: 12px; padding: 16px; margin-bottom: 15px; }
+  .label { font-size: 11px; color: #8888aa; text-transform: uppercase; }
+  .val { font-size: 20px; font-weight: bold; color: #f7a34f; margin-bottom: 8px; }
+  .wsn-val { font-size: 16px; color: #4fd97e; font-family: monospace; }
+  input { width: 100%; box-sizing: border-box; padding: 12px; background: #0f0f1a; border: 1px solid #2a2a45; color: white; font-size: 16px; border-radius: 8px; margin-top: 8px; }
+  .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 8px; }
+  .btn-primary { background: #4f8ef7; color: white; }
+  .btn-danger { background: #f75f5f; color: white; }
+  .btn-ghost { background: #252540; color: white; }
+  #qrcode { background: white; padding: 16px; border-radius: 8px; display: inline-block; margin-top: 15px; }
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div class="screen active" id="screen-login">
-  <div class="logo">
-    <div class="icon">&#128203;</div>
-    <h1>HHD Stock Take</h1>
-    <p>RC Lite - Manual Stock Verification</p>
-  </div>
+<div id="login-screen" class="card">
+  <h2>HHD Stock Take</h2>
+  <div class="label">Employee ID</div>
+  <input type="text" id="empId" placeholder="Enter ID">
+  <button class="btn btn-primary" onclick="startSession()">Start Audit</button>
+</div>
+
+<div id="audit-screen" style="display:none;">
   <div class="card">
-    <label for="empInput">Employee ID</label>
-    <input type="text" id="empInput" placeholder="Enter Employee ID" autocomplete="off" spellcheck="false">
+    <div class="label">Location</div>
+    <div class="val" id="disp-loc">-</div>
+    <div class="label">WID (Scan/Verify)</div>
+    <div class="val" style="color:#4f8ef7" id="disp-wid">-</div>
+    <div class="label">Required Count</div>
+    <div class="val" style="color:#ffffff" id="disp-count">0 / 0</div>
   </div>
-  <div class="alert alert-error" id="loginAlert"><span>&#9888;</span><span id="loginAlertMsg"></span></div>
-  <button class="btn btn-primary" onclick="doLogin()">Start Stock Take</button>
-  <button class="btn btn-ghost" style="font-size:13px;margin-top:-8px" onclick="showScreen('screen-supervisor');loadSupResults()">&#128228; Upload Data</button>
-  <p class="gen-info">Last updated: 27/7/2026, 9:59:09 pm</p>
-</div>
 
-<!-- VERIFY -->
-<div class="screen" id="screen-verify">
-  <div class="chips">
-    <div class="chip">&#128100; <strong id="chipEmp">-</strong></div>
-    <div class="chip">&#10003; <strong id="chipDone">0</strong> done</div>
-    <div class="chip">&#9888; <strong id="chipIssue">0</strong> issues</div>
-  </div>
-  <div>
-    <div class="progress-info" style="margin-bottom:8px">
-      <span>Progress</span><strong id="progressLabel">0 / 0</strong>
+  <div class="card">
+    <div class="label">Scan WSN</div>
+    <input type="text" id="wsn-input" placeholder="Scan WSN..." onkeydown="if(event.key==='Enter') verifyWSN()">
+    <div style="display:flex; gap:10px; margin-top:10px;">
+      <button class="btn btn-primary" onclick="verifyWSN()">Verify</button>
+      <button class="btn btn-danger" onclick="markIssue()">Issue</button>
     </div>
-    <div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
-  </div>
-  <div class="pick-card">
-    <div class="pick-seq" id="pickSeq">WSN 1 OF 0</div>
-    <div class="pick-location">
-      <div class="loc-icon">&#128205;</div>
-      <div class="loc-text">
-        <div class="loc-label">Location</div>
-        <div class="loc-val" id="pickLocation">-</div>
-      </div>
-    </div>
-    <div class="tid-badge" id="tidBadge">-</div>
-    <div class="pick-wsn-label">Verify WSN</div>
-    <div class="pick-wsn-val" id="pickWSN">-</div>
-    <div class="scan-wrap">
-      <input type="text" id="scanInput" placeholder="Scan or type WSN..." autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter')confirmScan()">
-      <button class="scan-btn" onclick="confirmScan()">&#8594;</button>
-    </div>
-  </div>
-  <div class="alert" id="pickAlert"><span id="pickAlertIcon"></span><span id="pickAlertMsg"></span></div>
-  <div class="remark-section" id="remarkSection">
-    <label>Remark (describe the issue)</label>
-    <textarea id="remarkInput" placeholder="e.g. WSN not found, damaged, wrong location..."></textarea>
-    <div style="display:flex;gap:10px;margin-top:12px">
-      <button class="btn btn-danger" style="flex:1" onclick="confirmIssue()">Confirm Issue</button>
-      <button class="btn btn-ghost" style="flex:1" onclick="cancelIssue()">Cancel</button>
-    </div>
-  </div>
-  <div style="display:flex;gap:10px">
-    <button class="btn btn-success" style="flex:2" onclick="confirmScan()">&#10003; Done</button>
-    <button class="btn btn-ghost" style="flex:1;font-size:13px" onclick="showRemarkSection()">&#9888; Issue</button>
   </div>
 </div>
 
-<!-- EMPLOYEE DONE -->
-<div class="screen" id="screen-done">
-  <div class="done-anim">&#10024;</div>
-  <div class="done-title">Stock Take Complete!</div>
-  <div class="done-sub" id="doneSub"></div>
-  <div class="sync-msg" id="syncMsg"></div>
-  <div class="divider"></div>
-  <div class="card" id="doneStats"></div>
-  <button class="btn btn-primary" onclick="resetApp()">Start New Session</button>
-</div>
-
-<!-- SUPERVISOR DASHBOARD -->
-<div class="screen" id="screen-supervisor">
-  <div style="display:flex;align-items:center;justify-content:space-between">
-    <div style="font-size:18px;font-weight:700;color:var(--accent2)">&#128228; Upload Data</div>
-    <button class="btn btn-ghost" style="width:auto;padding:8px 14px;font-size:13px" onclick="showScreen('screen-login')">&#8592; Back</button>
-  </div>
-  <div class="sup-panel" id="supResults">
-    <div class="sup-title">&#128203; Pending Results</div>
-    <div id="supResultsBody" style="color:var(--muted);font-size:14px">Loading...</div>
-  </div>
-  <div class="sync-msg" id="supSyncMsg"></div>
-  <button class="btn btn-warn" id="pushBtn" onclick="pushResultsToSheet()" disabled>&#128228; Push Results to Sheet</button>
-  <button class="btn btn-ghost" style="font-size:13px" onclick="clearAllLocalResults()">&#128465; Clear All Local Results</button>
+<div id="summary-screen" style="display:none;" class="card" style="text-align:center;">
+  <h2>Session Complete</h2>
+  <p>Show this 2D Barcode to Supervisor for Scanning:</p>
+  <div id="qrcode"></div>
+  <button class="btn btn-ghost" onclick="location.reload()" style="margin-top:20px;">New Audit</button>
 </div>
 
 <script>
-const DB = {"6789":[{"wsn":"1AEJEK_Q","location":"FRD1001C5","tid":"TK-20260727-G03"},{"wsn":"0TRL1G_U","location":"FRD1001C5","tid":"TK-20260727-G03"},{"wsn":"0TQKG7_J","location":"FRD1001C5","tid":"TK-20260727-G03"},{"wsn":"0TRKZD_F","location":"FRD1001C5","tid":"TK-20260727-G03"},{"wsn":"1BLHGF_I","location":"FRD1001C5","tid":"TK-20260727-G03"}],"9876":[{"wsn":"1FTU3A_H","location":"GRD1105D2","tid":"TK-20260727-G04"},{"wsn":"1BKLE7_B","location":"GRD1105D2","tid":"TK-20260727-G04"},{"wsn":"1BKLQ2_B","location":"GRD1105D2","tid":"TK-20260727-G04"}],"12345":[{"wsn":"1A2HXN_N","location":"FRD1001C5","tid":"TK-20260727-G01"},{"wsn":"0WIRLO_H","location":"FRD1001C5","tid":"TK-20260727-G01"},{"wsn":"1BLHOV_E","location":"FRD1001C5","tid":"TK-20260727-G01"},{"wsn":"1C379S_G","location":"FRD1001C5","tid":"TK-20260727-G01"}],"54321":[{"wsn":"1FL9GK_B","location":"GRD1105D2","tid":"TK-20260727-G02"},{"wsn":"1BTUC4_Z","location":"GRD1105D2","tid":"TK-20260727-G02"}]};
-const WEB_APP = 'https://script.google.com/a/macros/flipkart.com/s/AKfycbzbPRGPNQ2mUjwWddvM6WJxWzrWHaFvpcEVtMUzWdxXi0UrwVAd-1m-fclj5aaaXYYu/exec';
-const SUP_PASS = '';
-const STORAGE_KEY = 'stocktake_results_20260727';
+const DATA = [{"row":3,"wid":"XIN8H0C","location":"GRD1009B1","expectedCount":1,"wsns":["23L82L_R"]},{"row":4,"wid":"XIQQX7F","location":"GRD1009B1","expectedCount":1,"wsns":["2Q064R_J"]},{"row":5,"wid":"XIHH1OT","location":"GRD1009C1","expectedCount":1,"wsns":["2O99EZ_L"]},{"row":6,"wid":"XIKOVI2","location":"GRD1009C1","expectedCount":1,"wsns":["2QXML2_N"]},{"row":7,"wid":"XIN0VCT","location":"GRD1009C1","expectedCount":1,"wsns":["2462BA_J"]},{"row":8,"wid":"XIN5RCU","location":"GRD1009C1","expectedCount":1,"wsns":["299GAN_F"]},{"row":9,"wid":"XIN6XYB","location":"GRD1009C1","expectedCount":2,"wsns":["1YUC0W_P","1VWR53_Z"]},{"row":10,"wid":"XINE33R","location":"GRD1009C1","expectedCount":1,"wsns":["22X74V_P"]},{"row":11,"wid":"XIOZZEL","location":"GRD1009C1","expectedCount":2,"wsns":["2RD8S2_J","2P2L71_L"]},{"row":12,"wid":"XIP9LYJ","location":"GRD1009C1","expectedCount":1,"wsns":["2Q0A12_N"]},{"row":13,"wid":"XIMSX16","location":"GRD1009D1","expectedCount":1,"wsns":["2R73OG_Z"]},{"row":14,"wid":"XIMUTZ8","location":"GRD1009D1","expectedCount":1,"wsns":["2QQT4C_Z"]},{"row":15,"wid":"XIMV7HL","location":"GRD1009D1","expectedCount":1,"wsns":["2DLE60_D"]},{"row":16,"wid":"XIMX10G","location":"GRD1009D1","expectedCount":1,"wsns":["26JF42_B"]},{"row":17,"wid":"XIMXTCT","location":"GRD1009D1","expectedCount":1,"wsns":["2QWMBW_J"]},{"row":18,"wid":"XIMYCDR","location":"GRD1009D1","expectedCount":1,"wsns":["2DIT7B_J"]},{"row":19,"wid":"XIMYMZT","location":"GRD1009D1","expectedCount":1,"wsns":["2ERDI0_P"]},{"row":20,"wid":"XIMYTNB","location":"GRD1009D1","expectedCount":1,"wsns":["2RF1YM_X"]},{"row":21,"wid":"XIMZ2BY","location":"GRD1009D1","expectedCount":2,"wsns":["27CKA1_H","20MV36_Z"]},{"row":22,"wid":"XIN0RZX","location":"GRD1009D1","expectedCount":1,"wsns":["2R5L8F_V"]},{"row":23,"wid":"XIN74GU","location":"GRD1009D1","expectedCount":1,"wsns":["2RDIKE_Z"]},{"row":24,"wid":"XIN8921","location":"GRD1009D1","expectedCount":1,"wsns":["2E4KJD_H"]},{"row":25,"wid":"XIN9GPA","location":"GRD1009D1","expectedCount":1,"wsns":["2DWIY9_V"]},{"row":26,"wid":"XINII54","location":"GRD1009D1","expectedCount":1,"wsns":["2Q72L5_B"]},{"row":27,"wid":"XIO4AWT","location":"GRD1009D1","expectedCount":1,"wsns":["2R77P2_J"]},{"row":28,"wid":"XIRII6W","location":"GRD1009D1","expectedCount":1,"wsns":["2Q7RKA_H"]},{"row":29,"wid":"XIRII9Q","location":"GRD1009D1","expectedCount":1,"wsns":["2QN8XF_R"]},{"row":30,"wid":"XIRIIZC","location":"GRD1009D1","expectedCount":1,"wsns":["2RDU5B_V"]},{"row":31,"wid":"XINFBE3","location":"GRD1009D4","expectedCount":1,"wsns":["1S8QSK_N"]},{"row":32,"wid":"XIN0EC9","location":"GRD1009D6","expectedCount":1,"wsns":["214032_H"]},{"row":33,"wid":"XINIHMK","location":"GRD1009D6","expectedCount":1,"wsns":["1YSKE6_B"]},{"row":34,"wid":"XINBMGP","location":"GRD1009D7","expectedCount":1,"wsns":["1T2QOB_B"]},{"row":35,"wid":"XIAR193","location":"GRD1010B1","expectedCount":1,"wsns":["#N/A"]},{"row":36,"wid":"XIMY9FZ","location":"GRD1010B1","expectedCount":1,"wsns":["2Q7DOB_L"]},{"row":37,"wid":"XIN0VCT","location":"GRD1010B1","expectedCount":1,"wsns":["1JHIY8_I"]},{"row":38,"wid":"XIN8R5T","location":"GRD1010B1","expectedCount":1,"wsns":["1J0PRR_G"]},{"row":39,"wid":"XIO48BU","location":"GRD1010B1","expectedCount":1,"wsns":["2QHZZY_F"]},{"row":40,"wid":"XIN99P9","location":"GRD1010C1","expectedCount":1,"wsns":["1KSVCN_J"]},{"row":41,"wid":"XIMYC2F","location":"GRD1010D1","expectedCount":1,"wsns":["2RF9O5_R"]},{"row":42,"wid":"XIN9O7C","location":"GRD1010D1","expectedCount":2,"wsns":["20LZCY_P","1JEVB3_V"]},{"row":43,"wid":"XINRTX8","location":"GRD1010D1","expectedCount":1,"wsns":["275JHY_F"]},{"row":44,"wid":"XIIKKEU","location":"GRD1010D2","expectedCount":1,"wsns":["17BVJB_T"]},{"row":45,"wid":"XIMYEBW","location":"GRD1010D2","expectedCount":1,"wsns":["1H7654_U"]},{"row":46,"wid":"XIMYXQS","location":"GRD1010D2","expectedCount":4,"wsns":["1KCP28_B","1K5ZS5_P","1OTEH0_T","1KCFIM_V"]},{"row":47,"wid":"XIMYXVX","location":"GRD1010D2","expectedCount":1,"wsns":["1KHHLK_X"]},{"row":48,"wid":"XIMZHLE","location":"GRD1010D2","expectedCount":1,"wsns":["1IO52B_L"]},{"row":49,"wid":"XIMZV9Y","location":"GRD1010D2","expectedCount":1,"wsns":["1H2YFL_W"]},{"row":50,"wid":"XIN02UT","location":"GRD1010D2","expectedCount":1,"wsns":["1KR8F5_N"]},{"row":51,"wid":"XIN0I7A","location":"GRD1010D2","expectedCount":1,"wsns":["1HJYUN_W"]},{"row":52,"wid":"XIN0RD3","location":"GRD1010D2","expectedCount":1,"wsns":["1H3U4F_M"]},{"row":53,"wid":"XIN12R3","location":"GRD1010D2","expectedCount":1,"wsns":["1I290X_U"]},{"row":54,"wid":"XIN8921","location":"GRD1010D2","expectedCount":1,"wsns":["1JI2VO_E"]},{"row":55,"wid":"XINAM43","location":"GRD1010D2","expectedCount":1,"wsns":["20WL5D_B"]},{"row":56,"wid":"XINF56A","location":"GRD1010D2","expectedCount":2,"wsns":["1L5ODZ_P","1RI50I_F"]},{"row":57,"wid":"XIOF0IE","location":"GRD1010D2","expectedCount":1,"wsns":["1FP84E_C"]},{"row":58,"wid":"XIN2CWN","location":"GRD1010D3","expectedCount":1,"wsns":["1XXZ8K_T"]},{"row":59,"wid":"XIN7TAY","location":"GRD1010D3","expectedCount":1,"wsns":["21B3CI_R"]},{"row":60,"wid":"XIP87B2","location":"GRD1010D3","expectedCount":1,"wsns":["1ZVHHH_B"]},{"row":61,"wid":"XIQQX7F","location":"GRD1010D4","expectedCount":1,"wsns":["2HUH6R_F"]},{"row":62,"wid":"XINF56A","location":"GRD1010D5","expectedCount":2,"wsns":["1L5ODZ_P","1RI50I_F"]},{"row":63,"wid":"XINJNXY","location":"GRD1010D5","expectedCount":1,"wsns":["1YOCJZ_J"]},{"row":64,"wid":"XIHH1OT","location":"GRD1010D6","expectedCount":8,"wsns":["2NLATJ_P","2P9J31_F","2P98O5_B","2P80TH_D","2PHQBY_T","2PQMVU_D","2OKCE2_P","2P8Y4K_B"]},{"row":65,"wid":"XIMYXQS","location":"GRD1010D6","expectedCount":4,"wsns":["1KCP28_B","1K5ZS5_P","1OTEH0_T","1KCFIM_V"]},{"row":66,"wid":"XIMYXQS","location":"GRD1010D7","expectedCount":4,"wsns":["1KCP28_B","1K5ZS5_P","1OTEH0_T","1KCFIM_V"]},{"row":67,"wid":"XIN00L5","location":"GRD1010D7","expectedCount":1,"wsns":["1J6IEW_H"]},{"row":68,"wid":"XIN777D","location":"GRD1010D7","expectedCount":1,"wsns":["1KAB1U_L"]},{"row":69,"wid":"XIN7VE8","location":"GRD1010D7","expectedCount":1,"wsns":["1IOZ4B_M"]},{"row":70,"wid":"XIN9O7C","location":"GRD1010D7","expectedCount":2,"wsns":["20LZCY_P","1JEVB3_V"]},{"row":71,"wid":"XINAOG1","location":"GRD1010D7","expectedCount":1,"wsns":["1JALWB_G"]},{"row":72,"wid":"XIOEF8X","location":"GRD1010D7","expectedCount":1,"wsns":["1EXHA6_C"]},{"row":73,"wid":"XIN9W1C","location":"GRD1010E8","expectedCount":1,"wsns":["1I9L1F_Y"]},{"row":74,"wid":"XIMYGCT","location":"GRD1162B1","expectedCount":1,"wsns":["2NKGFW_V"]},{"row":75,"wid":"XIMYGCT","location":"GRD1162B1","expectedCount":1,"wsns":["2NKGFW_V"]},{"row":76,"wid":"XIQYCKK","location":"GRD1162C1","expectedCount":1,"wsns":["2KAKG4_R"]},{"row":77,"wid":"XIQYCKK","location":"GRD1162C1","expectedCount":1,"wsns":["2KAKG4_R"]},{"row":78,"wid":"XIA3OTR","location":"GRD1162C2","expectedCount":1,"wsns":["0VRBYA_K"]},{"row":79,"wid":"XIMYIMJ","location":"GRD1162C2","expectedCount":1,"wsns":["21X4CS_T"]},{"row":80,"wid":"XIA3OTR","location":"GRD1162C2","expectedCount":1,"wsns":["0VRBYA_K"]},{"row":81,"wid":"XIMYIMJ","location":"GRD1162C2","expectedCount":1,"wsns":["21X4CS_T"]},{"row":82,"wid":"XIHH1OT","location":"GRD1162C5","expectedCount":7,"wsns":["2OCA4I_T","2P7ERW_H","2P0TFT_T","2PBR7I_T","2PZBBU_P","2OSKYJ_H","2NSY52_F"]},{"row":83,"wid":"XIHH1OT","location":"GRD1162C5","expectedCount":7,"wsns":["2OCA4I_T","2P7ERW_H","2P0TFT_T","2PBR7I_T","2PZBBU_P","2OSKYJ_H","2NSY52_F"]},{"row":84,"wid":"XIN6SUU","location":"GRD1162C6","expectedCount":1,"wsns":["21IQTM_L"]},{"row":85,"wid":"XIN6SUU","location":"GRD1162C6","expectedCount":1,"wsns":["21IQTM_L"]},{"row":86,"wid":"XIO9UOT","location":"GRD1162C8","expectedCount":1,"wsns":["2K92J4_D"]},{"row":87,"wid":"XIO9UOT","location":"GRD1162C8","expectedCount":1,"wsns":["2K92J4_D"]},{"row":88,"wid":"XIN636C","location":"GRD1162D1","expectedCount":1,"wsns":["21IXW6_H"]},{"row":89,"wid":"XIN8HS8","location":"GRD1162D1","expectedCount":1,"wsns":["22LII7_B"]},{"row":90,"wid":"XING978","location":"GRD1162D1","expectedCount":1,"wsns":["21INQ5_T"]},{"row":91,"wid":"XIN636C","location":"GRD1162D1","expectedCount":1,"wsns":["21IXW6_H"]},{"row":92,"wid":"XIN8HS8","location":"GRD1162D1","expectedCount":1,"wsns":["22LII7_B"]},{"row":93,"wid":"XING978","location":"GRD1162D1","expectedCount":1,"wsns":["21INQ5_T"]},{"row":94,"wid":"XIPAIMS","location":"GRD1162D3","expectedCount":1,"wsns":["27XTS4_L"]},{"row":95,"wid":"XIPAIMS","location":"GRD1162D3","expectedCount":1,"wsns":["27XTS4_L"]},{"row":96,"wid":"XIH7XR3","location":"GRD1162D4","expectedCount":1,"wsns":["11E67D_M"]},{"row":97,"wid":"XIH7XR3","location":"GRD1162D4","expectedCount":1,"wsns":["11E67D_M"]},{"row":98,"wid":"XIH6AER","location":"GRD1162D5","expectedCount":1,"wsns":["11A1MK_U"]},{"row":99,"wid":"XIH6J80","location":"GRD1162D5","expectedCount":1,"wsns":["11IZSQ_N"]},{"row":100,"wid":"XIN8H0C","location":"GRD1162D5","expectedCount":1,"wsns":["21JHIM_P"]},{"row":101,"wid":"XIH6AER","location":"GRD1162D5","expectedCount":1,"wsns":["11A1MK_U"]},{"row":102,"wid":"XIH6J80","location":"GRD1162D5","expectedCount":1,"wsns":["11IZSQ_N"]},{"row":103,"wid":"XIN8H0C","location":"GRD1162D5","expectedCount":1,"wsns":["21JHIM_P"]}];
+let currentIndex = 0;
+let empId = '';
+let results = [];
+let currentScannedWSNs = [];
 
-let verified = {};
-let state = {empId:'',total:0,doneCount:0,issueCount:0,currentWSN:'',currentLocation:'',currentTID:'',startTime:null,results:[]};
-
-function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
-function showAlert(msg,type){const el=document.getElementById('pickAlert');el.className='alert alert-'+type+' show';document.getElementById('pickAlertIcon').textContent=type==='error'?'?':type==='success'?'?':'!';document.getElementById('pickAlertMsg').textContent=msg}
-function hideAlert(){document.getElementById('pickAlert').classList.remove('show')}
-function updateProgress(){const pct=state.total>0?((state.doneCount+state.issueCount)/state.total*100):0;document.getElementById('progressBar').style.width=pct+'%';document.getElementById('progressLabel').textContent=(state.doneCount+state.issueCount)+' / '+state.total;document.getElementById('chipDone').textContent=state.doneCount;document.getElementById('chipIssue').textContent=state.issueCount}
-
-// ?? Employee login ????????????????????????????????????????????
-function doLogin(){
-  const empId=document.getElementById('empInput').value.trim();
-  if(!empId){showLoginErr('Please enter your Employee ID');return}
-  const list=DB[empId];
-  if(!list||!list.length){showLoginErr('No WSNs assigned to: '+empId);return}
-  state={empId,total:list.length,doneCount:0,issueCount:0,currentWSN:'',currentLocation:'',currentTID:'',startTime:Date.now(),results:[]};
-  verified={};
-  document.getElementById('chipEmp').textContent=empId;
-  updateProgress();showScreen('screen-verify');loadNext();
-}
-function showLoginErr(msg){const el=document.getElementById('loginAlert');el.className='alert alert-error show';document.getElementById('loginAlertMsg').textContent=msg}
-
-function loadNext(){
-  const list=DB[state.empId];
-  const next=list.find(i=>!verified[i.wsn]);
-  if(!next){showDone();return}
-  state.currentWSN=next.wsn;state.currentLocation=next.location;state.currentTID=next.tid;
-  document.getElementById('pickLocation').textContent=next.location;
-  document.getElementById('pickWSN').textContent=next.wsn;
-  document.getElementById('tidBadge').textContent=next.tid;
-  document.getElementById('pickSeq').textContent='WSN '+(state.doneCount+state.issueCount+1)+' OF '+state.total;
-  document.getElementById('scanInput').value='';
-  document.getElementById('scanInput').focus();
-  hideAlert();hideRemarkSection();
+function startSession() {
+  empId = document.getElementById('empId').value.trim();
+  if(!empId) return alert('Enter Emp ID');
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('audit-screen').style.display = 'block';
+  loadCard();
 }
 
-function confirmScan(){
-  const scanned=document.getElementById('scanInput').value.trim().toUpperCase();
-  const expected=state.currentWSN.toUpperCase();
-  if(!scanned){showAlert('Scan or type the WSN','warn');return}
-  if(scanned!==expected){showAlert('Wrong WSN! Expected: '+state.currentWSN,'error');document.getElementById('scanInput').value='';document.getElementById('scanInput').focus();return}
-  verified[state.currentWSN]='done';
-  state.doneCount++;
-  state.results.push({wsn:state.currentWSN,status:'Done',remark:'',tid:state.currentTID,empId:state.empId,time:new Date().toLocaleTimeString('en-IN')});
-  updateProgress();showAlert('? Verified ? '+state.currentWSN,'success');
-  setTimeout(loadNext,700);
+function loadCard() {
+  if(currentIndex >= DATA.length) return finishSession();
+  const item = DATA[currentIndex];
+  document.getElementById('disp-loc').textContent = item.location;
+  document.getElementById('disp-wid').textContent = item.wid;
+  document.getElementById('disp-count').textContent = currentScannedWSNs.length + ' / ' + item.expectedCount;
+  document.getElementById('wsn-input').value = '';
+  document.getElementById('wsn-input').focus();
 }
 
-function showRemarkSection(){document.getElementById('remarkSection').classList.add('show');document.getElementById('remarkInput').value='';document.getElementById('remarkInput').focus()}
-function hideRemarkSection(){document.getElementById('remarkSection').classList.remove('show')}
-function cancelIssue(){hideRemarkSection();document.getElementById('scanInput').focus()}
-
-function confirmIssue(){
-  const remark=document.getElementById('remarkInput').value.trim();
-  if(!remark){alert('Please enter a remark.');return}
-  verified[state.currentWSN]='issue';
-  state.issueCount++;
-  state.results.push({wsn:state.currentWSN,status:'Issue',remark,tid:state.currentTID,empId:state.empId,time:new Date().toLocaleTimeString('en-IN')});
-  updateProgress();hideRemarkSection();showAlert('Issue recorded ? '+state.currentWSN,'warn');
-  setTimeout(loadNext,700);
-}
-
-function showDone(){
-  const elapsed=Math.round((Date.now()-state.startTime)/1000);
-  const mins=Math.floor(elapsed/60),secs=elapsed%60;
-  document.getElementById('doneSub').textContent='Employee: '+state.empId;
-  let rows=state.results.map(r=>'<div class="result-row"><span style="font-family:monospace;font-size:12px">'+r.wsn+'</span><span style="font-size:11px;color:var(--muted)">'+r.tid+'</span><span class="tag tag-'+r.status.toLowerCase()+'">'+r.status+'</span></div>').join('');
-  document.getElementById('doneStats').innerHTML=
-    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;margin-bottom:16px">'+
-    '<div><div style="font-size:28px;font-weight:800;color:var(--success)">'+state.doneCount+'</div><div style="font-size:11px;color:var(--muted)">Done</div></div>'+
-    '<div><div style="font-size:28px;font-weight:800;color:var(--danger)">'+state.issueCount+'</div><div style="font-size:11px;color:var(--muted)">Issues</div></div>'+
-    '<div><div style="font-size:28px;font-weight:800;color:var(--accent)">'+mins+'m '+secs+'s</div><div style="font-size:11px;color:var(--muted)">Time</div></div>'+
-    '</div>'+rows;
-  showScreen('screen-done');
-
-  // Save results to localStorage ? supervisor collects from here
-  const existing = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
-  const merged = [...existing];
-  state.results.forEach(r=>{
-    const idx=merged.findIndex(e=>e.wsn.toUpperCase()===r.wsn.toUpperCase());
-    if(idx>=0) merged[idx]=r; else merged.push(r);
-  });
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-
-  const syncEl=document.getElementById('syncMsg');
-  syncEl.style.display='block';
-  syncEl.style.background='rgba(79,217,126,0.15)';
-  syncEl.style.color='var(--success)';
-  syncEl.textContent='? Results saved locally. Supervisor will collect from this device.';
-}
-
-function resetApp(){
-  state={empId:'',total:0,doneCount:0,issueCount:0,currentWSN:'',currentLocation:'',currentTID:'',startTime:null,results:[]};
-  verified={};
-  document.getElementById('empInput').value='';
-  document.getElementById('loginAlert').classList.remove('show');
-  showScreen('screen-login');
-}
-
-// ?? Supervisor dashboard ??????????????????????????????????????
-
-function loadSupResults(){
-  const results=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
-  const body=document.getElementById('supResultsBody');
-  const pushBtn=document.getElementById('pushBtn');
-
-  if(!results.length){
-    body.innerHTML='<div style="color:var(--muted);font-size:14px;text-align:center;padding:20px 0">No results collected yet.<br>Employees must complete stock take on their HHD first.</div>';
-    pushBtn.disabled=true;
+function verifyWSN() {
+  const val = document.getElementById('wsn-input').value.trim().toUpperCase();
+  const item = DATA[currentIndex];
+  
+  if(!item.wsns.map(w=>w.toUpperCase()).includes(val)) {
+    alert('Invalid WSN for this WID!');
     return;
   }
+  
+  if(!currentScannedWSNs.includes(val)) {
+    currentScannedWSNs.push(val);
+    results.push({ wsn: val, status: 'Done', remark: '' });
+  }
 
-  // Group by employee
-  const byEmp={};
-  results.forEach(r=>{
-    if(!byEmp[r.empId]) byEmp[r.empId]=[];
-    byEmp[r.empId].push(r);
+  if(currentScannedWSNs.length >= item.expectedCount) {
+    currentIndex++;
+    currentScannedWSNs = [];
+  }
+  loadCard();
+}
+
+function markIssue() {
+  const rem = prompt('Describe Issue:') || 'Count mismatch/Missing';
+  const item = DATA[currentIndex];
+  item.wsns.forEach(w => {
+    results.push({ wsn: w, status: 'Issue', remark: rem });
   });
+  currentIndex++;
+  currentScannedWSNs = [];
+  loadCard();
+}
 
-  let html='';
-  Object.keys(byEmp).forEach(emp=>{
-    const items=byEmp[emp];
-    const done=items.filter(r=>r.status==='Done').length;
-    const issues=items.filter(r=>r.status==='Issue').length;
-    html+='<div class="emp-block">'+
-      '<div class="emp-block-title">Employee: '+emp+' &nbsp;|&nbsp; ? '+done+' Done &nbsp; ? '+issues+' Issues</div>'+
-      items.map(r=>'<div class="result-row"><span style="font-family:monospace;font-size:12px">'+r.wsn+'</span>'+
-        '<span style="font-size:11px;color:var(--muted)">'+r.tid+'</span>'+
-        '<span class="tag tag-'+r.status.toLowerCase()+'">'+r.status+'</span></div>').join('')+
-      '</div>';
+function finishSession() {
+  document.getElementById('audit-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'block';
+  
+  // Encrypt session to compact payload format: EMP|WSN:STATUS:REMARK;...
+  const payload = empId + '|' + results.map(r => r.wsn + ':' + r.status + ':' + r.remark).join(';');
+  
+  new QRCode(document.getElementById("qrcode"), {
+    text: payload,
+    width: 250,
+    height: 250,
+    correctLevel : QRCode.CorrectLevel.L
   });
-
-  body.innerHTML=html+'<div style="font-size:12px;color:var(--muted);margin-top:8px">Total: '+results.length+' WSNs from '+Object.keys(byEmp).length+' employee(s)</div>';
-  pushBtn.disabled=false;
 }
-
-function pushResultsToSheet(){
-  const results=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
-  if(!results.length){alert('No results to push.');return}
-
-  const syncEl=document.getElementById('supSyncMsg');
-  syncEl.style.display='block';
-  syncEl.style.background='rgba(247,163,79,0.15)';
-  syncEl.style.color='var(--warn)';
-  syncEl.textContent='? Opening upload tab... Please wait.';
-  document.getElementById('pushBtn').disabled=true;
-
-  // Open Web App URL in new tab ? uses supervisor Google session, no CORS issue
-  const url=WEB_APP+'?data='+encodeURIComponent(JSON.stringify(results));
-  const win=window.open(url,'_blank');
-
-  let attempts=0;
-  const check=setInterval(()=>{
-    attempts++;
-    try{
-      if(win&&win.document&&win.document.body){
-        const text=win.document.body.innerText||'';
-        if(text.includes('"ok"')||text.includes('written')){
-          clearInterval(check);win.close();
-          syncEl.style.background='rgba(79,217,126,0.15)';
-          syncEl.style.color='var(--success)';
-          syncEl.textContent='? '+results.length+' results pushed to sheet successfully!';
-          return;
-        }
-        if(text.includes('"error"')){
-          clearInterval(check);win.close();
-          syncEl.style.background='rgba(247,95,95,0.15)';
-          syncEl.style.color='var(--danger)';
-          syncEl.textContent='? Error. Redeploy Web App and try again.';
-          document.getElementById('pushBtn').disabled=false;
-          return;
-        }
-      }
-    }catch(e){}
-    if(attempts>30){
-      clearInterval(check);
-      syncEl.style.background='rgba(79,217,126,0.15)';
-      syncEl.style.color='var(--success)';
-      syncEl.textContent='? Upload sent! Check sheet to confirm.';
-    }
-  },500);
-}
-
-function clearAllLocalResults(){
-  if(!confirm('Clear all locally saved results for today?')) return;
-  localStorage.removeItem(STORAGE_KEY);
-  loadSupResults();
-  document.getElementById('supSyncMsg').style.display='none';
-}
-
-document.getElementById('empInput').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
 </script>
 </body>
 </html>
