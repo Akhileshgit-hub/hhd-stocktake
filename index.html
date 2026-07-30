@@ -43,7 +43,7 @@
     </div>
     <div class="alert alert-error" id="loginAlert" style="margin-top:12px;"></div>
     <button class="btn btn-primary" style="margin-top:16px;" onclick="doLogin()">Start Audit</button>
-    <p style="font-size:11px; color:#8888aa; margin-top:16px;">Published: 30/7/2026, 3:33:18 pm</p>
+    <p style="font-size:11px; color:#8888aa; margin-top:16px;">Published: 30/7/2026, 3:51:53 pm</p>
   </div>
 </div>
 
@@ -104,7 +104,7 @@
 </div>
 
 <script>
-const EMP_DATA = {"3274824":[{"tid":"TK-20260730-G01","wid":"XIN0VCT","location":"GRD1009C1","expectedCount":1,"wsns":["2462BA_J"]},{"tid":"TK-20260730-G01","wid":"XIN5RCU","location":"GRD1009C1","expectedCount":1,"wsns":["299GAN_F"]},{"tid":"TK-20260730-G01","wid":"XIN6XYB","location":"GRD1009C1","expectedCount":2,"wsns":["1YUC0W_P","1VWR53_Z"]}]};
+const EMP_DATA = {"3274824":[{"tid":"TK-20260730-G01","wid":"XIN0VCT","location":"GRD1009C1","expectedCount":1,"wsns":["2462BA_J"]},{"tid":"TK-20260730-G01","wid":"XIN5RCU","location":"GRD1009C1","expectedCount":1,"wsns":["299GAN_F"]},{"tid":"TK-20260730-G01","wid":"XIN6XYB","location":"GRD1009C1","expectedCount":2,"wsns":["1YUC0W_P","1VWR53_Z"]}],"3274825":[{"tid":"TK-20260730-G02","wid":"XIOZZEL","location":"GRD1009C1","expectedCount":2,"wsns":["2RD8S2_J","2P2L71_L"]}],"3274826":[{"tid":"TK-20260730-G03","wid":"XIP9LYJ","location":"GRD1009C1","expectedCount":1,"wsns":["2Q0A12_N"]}]};
 let currentEmp = '';
 let assignments = [];
 let currentIdx = 0;
@@ -186,7 +186,6 @@ function validateScannedWSN() {
     return;
   }
 
-  // WSN validated! Open Action Prompt before committing
   pendingValidatedWSN = input;
   document.getElementById('modalWsnText').textContent = 'WSN: ' + input + ' (WID: ' + item.wid + ')';
   document.getElementById('actionModal').style.display = 'flex';
@@ -219,7 +218,7 @@ function confirmWSNStatus(status, remark) {
 }
 
 function promptIssueForWSN() {
-  const remark = prompt('Describe Issue for WSN ' + pendingValidatedWSN + ':') || 'Count Mismatch / Damaged';
+  const remark = prompt('Describe Issue for WSN ' + pendingValidatedWSN + ':') || 'Battery';
   confirmWSNStatus('Issue', remark);
 }
 
