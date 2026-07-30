@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>HHD Stock Take</title>
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body { background: #0f0f1a; color: #e8e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; }
@@ -25,7 +25,7 @@
   .alert { padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 600; display: none; }
   .alert-error { background: rgba(247,95,95,0.2); border: 1px solid #f75f5f; color: #f75f5f; }
   .alert-success { background: rgba(79,217,126,0.2); border: 1px solid #4fd97e; color: #4fd97e; }
-  .barcode-wrap { background: white; padding: 16px; border-radius: 12px; display: flex; justify-content: center; align-items: center; margin: 16px 0; overflow-x: auto; }
+  .barcode-wrap { background: white; padding: 16px; border-radius: 12px; display: flex; justify-content: center; align-items: center; margin: 16px 0; }
 </style>
 </head>
 <body>
@@ -41,7 +41,7 @@
     </div>
     <div class="alert alert-error" id="loginAlert" style="margin-top:12px;"></div>
     <button class="btn btn-primary" style="margin-top:16px;" onclick="doLogin()">Start Audit</button>
-    <p style="font-size:11px; color:#8888aa; margin-top:16px;">Published: 30/7/2026, 2:44:09 pm</p>
+    <p style="font-size:11px; color:#8888aa; margin-top:16px;">Published: 30/7/2026, 2:53:40 pm</p>
   </div>
 </div>
 
@@ -77,10 +77,10 @@
 <div class="screen" id="screen-summary">
   <div class="card" style="text-align:center;">
     <h2 style="font-size:20px; color:#4fd97e;">Stock Take Complete!</h2>
-    <p style="font-size:13px; color:#8888aa; margin-top:4px;">Scan this 1D Barcode with Supervisor Scanner</p>
+    <p style="font-size:13px; color:#8888aa; margin-top:4px;">Scan this 2D Barcode with Supervisor Scanner</p>
     
     <div class="barcode-wrap">
-      <svg id="barcodeSvg"></svg>
+      <div id="qrcode"></div>
     </div>
     
     <div style="font-size:12px; color:#8888aa; text-align:left; background:#0f0f1a; padding:10px; border-radius:8px;" id="summaryDetails"></div>
@@ -213,15 +213,14 @@ function renderSummary() {
     '<strong>Stock Take ID:</strong> ' + stockTakeId + '<br>' +
     '<strong>Total Items Audited:</strong> ' + sessionResults.length;
 
-  // Clear previous barcode and render high-density QR Code
-  const container = document.getElementById('barcodeContainer');
-  container.innerHTML = '';
-  
-  new QRCode(container, {
+  // Render High-Density 2D QR Barcode
+  const qrel = document.getElementById("qrcode");
+  qrel.innerHTML = "";
+  new QRCode(qrel, {
     text: payload,
-    width: 260,
-    height: 260,
-    correctLevel: QRCode.CorrectLevel.L // Low error correction = larger blocks = super easy to scan
+    width: 240,
+    height: 240,
+    correctLevel: QRCode.CorrectLevel.L
   });
 }
 
