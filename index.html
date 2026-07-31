@@ -25,7 +25,8 @@
   .alert { padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 600; display: none; }
   .alert-error { background: rgba(247,95,95,0.2); border: 1px solid #f75f5f; color: #f75f5f; }
   .alert-success { background: rgba(79,217,126,0.2); border: 1px solid #4fd97e; color: #4fd97e; }
-  .barcode-wrap { background: white; padding: 16px; border-radius: 12px; display: flex; justify-content: center; align-items: center; margin: 16px 0; }
+  .barcode-wrap { background: #ffffff; padding: 24px; border-radius: 16px; display: flex; justify-content: center; align-items: center; margin: 16px 0; border: 4px solid #ffffff; }
+  #qrcode img, #qrcode canvas { image-rendering: pixelated; display: block; margin: 0 auto; }
   .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; padding: 20px; z-index: 999; }
   .modal { background: #1a1a2e; border: 1px solid #2a2a45; border-radius: 14px; padding: 22px; width: 100%; max-width: 380px; text-align: center; }
 </style>
@@ -39,11 +40,11 @@
     <p style="font-size:13px; color:#8888aa; margin-bottom:20px;">Enter Employee Code to start</p>
     <div style="text-align:left;">
       <div class="label">Employee Code / ID</div>
-      <input type="text" id="empInput" placeholder="e.g. 7890" autocomplete="off">
+      <input type="text" id="empInput" placeholder="e.g. 3274824" autocomplete="off">
     </div>
     <div class="alert alert-error" id="loginAlert" style="margin-top:12px;"></div>
     <button class="btn btn-primary" style="margin-top:16px;" onclick="doLogin()">Start Audit</button>
-    <p style="font-size:11px; color:#8888aa; margin-top:16px;">Published: 31/7/2026, 2:57:42 pm</p>
+    <p style="font-size:11px; color:#8888aa; margin-top:16px;">Published: 31/7/2026, 3:40:07 pm</p>
   </div>
 </div>
 
@@ -130,7 +131,7 @@
 </div>
 
 <script>
-const EMP_DATA = {"3274824":[{"tid":"TK-20260731-G01","wid":"XIMT7U8","location":"GRD1029B1","expectedCount":1,"wsns":["2RQS7E_P"]},{"tid":"TK-20260731-G01","wid":"XIMTDTF","location":"GRD1029B1","expectedCount":1,"wsns":["2T31GO_T"]},{"tid":"TK-20260731-G01","wid":"XIMU49D","location":"GRD1029B1","expectedCount":1,"wsns":["2TH99G_R"]}],"3274825":[{"tid":"TK-20260731-G01","wid":"XIMVTSF","location":"GRD1029B1","expectedCount":1,"wsns":["1R2BNS_R"]},{"tid":"TK-20260731-G01","wid":"XIMWORD","location":"GRD1029B1","expectedCount":1,"wsns":["2T1NBC_L"]},{"tid":"TK-20260731-G01","wid":"XIMWTR1","location":"GRD1029B1","expectedCount":1,"wsns":["2SN5VH_X"]}],"3876189":[{"tid":"TK-20260731-G02","wid":"XIHH1OT","location":"GRD1041C1","expectedCount":4,"wsns":["2Q0123_P","2S07DE_Z","2S82X0_B","2S1CIR_V"]}]};
+const EMP_DATA = {"3274824":[{"tid":"TK-20260731-G03","wid":"XIKFTT3","location":"GRD1145B1","expectedCount":1,"wsns":["2SUFQ3_Z"]},{"tid":"TK-20260731-G03","wid":"XIMURIH","location":"GRD1145B1","expectedCount":1,"wsns":["2TALJK_X"]},{"tid":"TK-20260731-G03","wid":"XIMUUL0","location":"GRD1145B1","expectedCount":1,"wsns":["2T3BE3_R"]}],"3274825":[{"tid":"TK-20260731-G04","wid":"XIMX65D","location":"GRD1145B1","expectedCount":1,"wsns":["2R5PAC_D"]},{"tid":"TK-20260731-G04","wid":"XIMXCD4","location":"GRD1145B1","expectedCount":1,"wsns":["2SFS09_R"]},{"tid":"TK-20260731-G04","wid":"XIMXHZX","location":"GRD1145B1","expectedCount":1,"wsns":["2SGMQC_N"]}],"3876189":[{"tid":"TK-20260731-G02","wid":"XIO49OZ","location":"GRD1041C1","expectedCount":1,"wsns":["2RM8RW_L"]}]};
 let currentEmp = '';
 let assignments = [];
 let currentIdx = 0;
@@ -157,7 +158,6 @@ function doLogin() {
   currentEmp = code;
   assignments = EMP_DATA[code];
 
-  // Restore saved session if user reloaded
   const savedSession = localStorage.getItem('ST_SESSION_' + currentEmp);
   if (savedSession) {
     try {
@@ -264,7 +264,6 @@ function confirmWSNStatus(status, remark) {
     scannedWSNs = [];
     saveLocalSession();
 
-    // Check if location changed or stock take ended to show Location Summary Pop-up
     const nextItem = assignments[currentIdx];
     if (!nextItem || nextItem.location !== prevLocation) {
       triggerLocationSummaryPopup(prevLocation);
@@ -305,8 +304,8 @@ function renderSummary() {
   const stockTakeId = assignments[0].tid;
   const totalItems = sessionResults.length;
 
-  // Split large payload into parts if items > 40 so QR codes stay small and easily scannable
-  const chunkSize = 40;
+  // Ultra-compact chunking limit (25 WSNs per QR max) to guarantee large scannable modules
+  const chunkSize = 25;
   qrPayloadParts = [];
   
   const totalChunks = Math.ceil(totalItems / chunkSize) || 1;
@@ -345,8 +344,8 @@ function displayQRPart(index) {
   qrel.innerHTML = "";
   new QRCode(qrel, {
     text: qrPayloadParts[index],
-    width: 230,
-    height: 230,
+    width: 250,
+    height: 250,
     correctLevel: QRCode.CorrectLevel.L
   });
 }
