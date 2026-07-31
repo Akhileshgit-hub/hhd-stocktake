@@ -26,8 +26,8 @@
   .alert-error { background: rgba(247,95,95,0.2); border: 1px solid #f75f5f; color: #f75f5f; }
   .alert-success { background: rgba(79,217,126,0.2); border: 1px solid #4fd97e; color: #4fd97e; }
   .barcode-wrap { background: white; padding: 16px; border-radius: 12px; display: flex; justify-content: center; align-items: center; margin: 16px 0; }
-  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; padding: 20px; z-index: 999; }
-  .modal { background: #1a1a2e; border: 1px solid #2a2a45; border-radius: 14px; padding: 20px; width: 100%; max-width: 380px; text-align: center; }
+  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; padding: 20px; z-index: 999; }
+  .modal { background: #1a1a2e; border: 1px solid #2a2a45; border-radius: 14px; padding: 22px; width: 100%; max-width: 380px; text-align: center; }
 </style>
 </head>
 <body>
@@ -43,7 +43,7 @@
     </div>
     <div class="alert alert-error" id="loginAlert" style="margin-top:12px;"></div>
     <button class="btn btn-primary" style="margin-top:16px;" onclick="doLogin()">Start Audit</button>
-    <p style="font-size:11px; color:#8888aa; margin-top:16px;">Published: 31/7/2026, 10:13:50 am</p>
+    <p style="font-size:11px; color:#8888aa; margin-top:16px;">Published: 31/7/2026, 2:35:08 pm</p>
   </div>
 </div>
 
@@ -88,29 +88,58 @@
   </div>
 </div>
 
+<!-- LOCATION SUMMARY POPUP MODAL -->
+<div class="modal-overlay" id="locationModal">
+  <div class="modal">
+    <h2 style="color:#f7a34f; margin-bottom:6px;">? Location Complete!</h2>
+    <p style="font-size:15px; font-weight:bold; color:white; margin-bottom:16px;" id="locModalName">Location: -</p>
+    
+    <div style="background:#0f0f1a; padding:12px; border-radius:10px; text-align:left; margin-bottom:18px; font-size:14px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+        <span style="color:#8888aa;">Verified OK:</span>
+        <strong style="color:#4fd97e;" id="locModalDone">0</strong>
+      </div>
+      <div style="display:flex; justify-content:space-between;">
+        <span style="color:#8888aa;">Issues Reported:</span>
+        <strong style="color:#f75f5f;" id="locModalIssues">0</strong>
+      </div>
+    </div>
+    
+    <button class="btn btn-primary" onclick="closeLocationModal()">Continue to Next Location ?</button>
+  </div>
+</div>
+
 <!-- SUMMARY & 2D BARCODE SCREEN -->
 <div class="screen" id="screen-summary">
   <div class="card" style="text-align:center;">
     <h2 style="font-size:20px; color:#4fd97e;">Stock Take Complete!</h2>
-    <p style="font-size:13px; color:#8888aa; margin-top:4px;">Scan this 2D Barcode with Supervisor Scanner</p>
+    <p style="font-size:13px; color:#8888aa; margin-top:4px;" id="summaryNotice">Scan QR code with Supervisor Scanner</p>
     
     <div class="barcode-wrap">
       <div id="qrcode"></div>
     </div>
+
+    <div style="display:flex; gap:10px; margin-top:10px;" id="partNavBtns">
+      <button class="btn btn-ghost" id="prevPartBtn" style="display:none;" onclick="changePart(-1)">? Prev Part</button>
+      <button class="btn btn-ghost" id="nextPartBtn" style="display:none;" onclick="changePart(1)">Next Part ?</button>
+    </div>
     
-    <div style="font-size:12px; color:#8888aa; text-align:left; background:#0f0f1a; padding:10px; border-radius:8px;" id="summaryDetails"></div>
-    <button class="btn btn-ghost" style="margin-top:16px;" onclick="location.reload()">Next Session</button>
+    <div style="font-size:12px; color:#8888aa; text-align:left; background:#0f0f1a; padding:10px; border-radius:8px; margin-top:14px;" id="summaryDetails"></div>
+    <button class="btn btn-ghost" style="margin-top:16px;" onclick="clearLocalSessionAndReset()">Start New Session</button>
   </div>
 </div>
 
 <script>
-const EMP_DATA = {"3876189":[{"tid":"TK-20260731-G02","wid":"XINAMLI","location":"GRD1041A1","expectedCount":1,"wsns":["2PZ58E_P"]},{"tid":"TK-20260731-G02","wid":"XIHH1OT","location":"GRD1041C1","expectedCount":4,"wsns":["2Q0123_P","2S07DE_Z","2S82X0_B","2S1CIR_V"]}],"3909550":[{"tid":"TK-20260731-G01","wid":"XIMT7U8","location":"GRD1029B1","expectedCount":1,"wsns":["2RQS7E_P"]},{"tid":"TK-20260731-G01","wid":"XIMTDTF","location":"GRD1029B1","expectedCount":1,"wsns":["2T31GO_T"]},{"tid":"TK-20260731-G01","wid":"XIMU49D","location":"GRD1029B1","expectedCount":1,"wsns":["2TH99G_R"]},{"tid":"TK-20260731-G01","wid":"XIMVAJT","location":"GRD1029B1","expectedCount":1,"wsns":["2SN9HH_N"]},{"tid":"TK-20260731-G01","wid":"XIMVTSF","location":"GRD1029B1","expectedCount":1,"wsns":["1R2BNS_R"]},{"tid":"TK-20260731-G01","wid":"XIMWORD","location":"GRD1029B1","expectedCount":1,"wsns":["2T1NBC_L"]},{"tid":"TK-20260731-G01","wid":"XIMWTR1","location":"GRD1029B1","expectedCount":1,"wsns":["2SN5VH_X"]},{"tid":"TK-20260731-G01","wid":"XIMWUSB","location":"GRD1029B1","expectedCount":1,"wsns":["2SNPNX_Z"]},{"tid":"TK-20260731-G01","wid":"XIMXMCC","location":"GRD1029B1","expectedCount":1,"wsns":["2TAGJ5_X"]},{"tid":"TK-20260731-G01","wid":"XIMXNKG","location":"GRD1029B1","expectedCount":1,"wsns":["2TGE3F_P"]},{"tid":"TK-20260731-G01","wid":"XIMXNXD","location":"GRD1029B1","expectedCount":1,"wsns":["2SGBO3_F"]},{"tid":"TK-20260731-G01","wid":"XIMXVQP","location":"GRD1029B1","expectedCount":1,"wsns":["2P6T8H_R"]},{"tid":"TK-20260731-G01","wid":"XIMYO9F","location":"GRD1029B1","expectedCount":1,"wsns":["2RDFYN_P"]},{"tid":"TK-20260731-G01","wid":"XIN00ND","location":"GRD1029B1","expectedCount":1,"wsns":["25YI5L_T"]},{"tid":"TK-20260731-G01","wid":"XIN0ZBX","location":"GRD1029B1","expectedCount":1,"wsns":["2RNESC_D"]},{"tid":"TK-20260731-G01","wid":"XIN7JD6","location":"GRD1029B1","expectedCount":1,"wsns":["26DZID_H"]},{"tid":"TK-20260731-G01","wid":"XIN7PCD","location":"GRD1029B1","expectedCount":1,"wsns":["2T9UKT_F"]},{"tid":"TK-20260731-G01","wid":"XIN8H0C","location":"GRD1029B1","expectedCount":1,"wsns":["26ZA1E_V"]},{"tid":"TK-20260731-G01","wid":"XIO44QU","location":"GRD1029B1","expectedCount":1,"wsns":["2SMX6I_Z"]},{"tid":"TK-20260731-G01","wid":"XIO48PQ","location":"GRD1029B1","expectedCount":1,"wsns":["2T1EFO_T"]},{"tid":"TK-20260731-G01","wid":"XIO4R8J","location":"GRD1029B1","expectedCount":1,"wsns":["2S9FGT_F"]},{"tid":"TK-20260731-G01","wid":"XIO6Z4C","location":"GRD1029B1","expectedCount":1,"wsns":["2T941K_T"]},{"tid":"TK-20260731-G01","wid":"XIOWRT7","location":"GRD1029B1","expectedCount":1,"wsns":["2THWXC_J"]},{"tid":"TK-20260731-G01","wid":"XIP41A6","location":"GRD1029B1","expectedCount":1,"wsns":["2SOPXB_V"]},{"tid":"TK-20260731-G01","wid":"XIO4R8J","location":"GRD1029B1","expectedCount":1,"wsns":["2S9FGT_F"]},{"tid":"TK-20260731-G01","wid":"XIO6Z4C","location":"GRD1029B1","expectedCount":1,"wsns":["2T941K_T"]},{"tid":"TK-20260731-G01","wid":"XIOWRT7","location":"GRD1029B1","expectedCount":1,"wsns":["2THWXC_J"]},{"tid":"TK-20260731-G01","wid":"XIP41A6","location":"GRD1029B1","expectedCount":1,"wsns":["2SOPXB_V"]},{"tid":"TK-20260731-G01","wid":"XIMYXVX","location":"GRD1029C4","expectedCount":1,"wsns":["1T2H5K_P"]},{"tid":"TK-20260731-G01","wid":"XIN6Y28","location":"GRD1029C4","expectedCount":1,"wsns":["1R364U_N"]},{"tid":"TK-20260731-G01","wid":"XIQJVDL","location":"GRD1029C4","expectedCount":1,"wsns":["2G0NLC_Z"]},{"tid":"TK-20260731-G01","wid":"XIQJVDL","location":"GRD1029C4","expectedCount":1,"wsns":["2G0NLC_Z"]},{"tid":"TK-20260731-G01","wid":"XIJ52WH","location":"GRD1029C5","expectedCount":1,"wsns":["2SNCMH_F"]},{"tid":"TK-20260731-G01","wid":"XILXN0Q","location":"GRD1029C5","expectedCount":1,"wsns":["2SO9IW_V"]},{"tid":"TK-20260731-G01","wid":"XIMUVL9","location":"GRD1029C5","expectedCount":1,"wsns":["2S99EA_R"]},{"tid":"TK-20260731-G01","wid":"XIMV62M","location":"GRD1029C5","expectedCount":1,"wsns":["2T8MH8_D"]},{"tid":"TK-20260731-G01","wid":"XIMVCC4","location":"GRD1029C5","expectedCount":1,"wsns":["2SGO3O_R"]},{"tid":"TK-20260731-G01","wid":"XIMW491","location":"GRD1029C5","expectedCount":1,"wsns":["2SMRS9_N"]},{"tid":"TK-20260731-G01","wid":"XIMWCHU","location":"GRD1029C5","expectedCount":1,"wsns":["2SUJVB_X"]},{"tid":"TK-20260731-G01","wid":"XIMY0LH","location":"GRD1029C5","expectedCount":1,"wsns":["2SG1KQ_L"]},{"tid":"TK-20260731-G01","wid":"XIN6WPH","location":"GRD1029C5","expectedCount":1,"wsns":["2T2XLB_V"]},{"tid":"TK-20260731-G01","wid":"XINAHBK","location":"GRD1029C5","expectedCount":1,"wsns":["2SOEYS_J"]},{"tid":"TK-20260731-G01","wid":"XINAS1N","location":"GRD1029C5","expectedCount":1,"wsns":["1IABX3_Q"]},{"tid":"TK-20260731-G01","wid":"XIO45UU","location":"GRD1029C5","expectedCount":1,"wsns":["2SS3Q6_L"]},{"tid":"TK-20260731-G01","wid":"XIO48CV","location":"GRD1029C5","expectedCount":1,"wsns":["2SABKU_N"]},{"tid":"TK-20260731-G01","wid":"XIO48XF","location":"GRD1029C5","expectedCount":1,"wsns":["2T3A2O_T"]},{"tid":"TK-20260731-G01","wid":"XIO497V","location":"GRD1029C5","expectedCount":1,"wsns":["2SMHF9_B"]},{"tid":"TK-20260731-G01","wid":"XIO4N6S","location":"GRD1029C5","expectedCount":1,"wsns":["2ST9ZP_L"]},{"tid":"TK-20260731-G01","wid":"XIO5NWR","location":"GRD1029C5","expectedCount":1,"wsns":["2RUT0P_V"]},{"tid":"TK-20260731-G01","wid":"XIOKNGI","location":"GRD1029C5","expectedCount":1,"wsns":["2PSHV6_F"]},{"tid":"TK-20260731-G01","wid":"XIOQKB9","location":"GRD1029C5","expectedCount":1,"wsns":["2S5Z0B_N"]},{"tid":"TK-20260731-G01","wid":"XIPCWTU","location":"GRD1029C5","expectedCount":1,"wsns":["2T3BW5_H"]},{"tid":"TK-20260731-G01","wid":"XIPHDEA","location":"GRD1029C5","expectedCount":1,"wsns":["2SNCXW_T"]},{"tid":"TK-20260731-G01","wid":"XIPSAL8","location":"GRD1029C5","expectedCount":1,"wsns":["23EWFF_D"]},{"tid":"TK-20260731-G01","wid":"XIO5NWR","location":"GRD1029C5","expectedCount":1,"wsns":["2RUT0P_V"]},{"tid":"TK-20260731-G01","wid":"XIOKNGI","location":"GRD1029C5","expectedCount":1,"wsns":["2PSHV6_F"]},{"tid":"TK-20260731-G01","wid":"XIOQKB9","location":"GRD1029C5","expectedCount":1,"wsns":["2S5Z0B_N"]},{"tid":"TK-20260731-G01","wid":"XIPCWTU","location":"GRD1029C5","expectedCount":1,"wsns":["2T3BW5_H"]},{"tid":"TK-20260731-G01","wid":"XIPHDEA","location":"GRD1029C5","expectedCount":1,"wsns":["2SNCXW_T"]},{"tid":"TK-20260731-G01","wid":"XIPSAL8","location":"GRD1029C5","expectedCount":1,"wsns":["23EWFF_D"]},{"tid":"TK-20260731-G01","wid":"XIK6YBL","location":"GRD1029C6","expectedCount":1,"wsns":["2STB28_T"]},{"tid":"TK-20260731-G01","wid":"XIKCREG","location":"GRD1029C6","expectedCount":1,"wsns":["2SH8K4_F"]},{"tid":"TK-20260731-G01","wid":"XIMNMS0","location":"GRD1029C6","expectedCount":1,"wsns":["2SHLEL_V"]},{"tid":"TK-20260731-G01","wid":"XIMS84Z","location":"GRD1029C6","expectedCount":1,"wsns":["2SGV4J_T"]},{"tid":"TK-20260731-G01","wid":"XIMUVDL","location":"GRD1029C6","expectedCount":1,"wsns":["2STHX7_N"]},{"tid":"TK-20260731-G01","wid":"XIMUY45","location":"GRD1029C6","expectedCount":1,"wsns":["2R58TN_Z"]},{"tid":"TK-20260731-G01","wid":"XIMUZ90","location":"GRD1029C6","expectedCount":1,"wsns":["2SMHTU_V"]},{"tid":"TK-20260731-G01","wid":"XIMUZAK","location":"GRD1029C6","expectedCount":1,"wsns":["2SSCY5_Z"]},{"tid":"TK-20260731-G01","wid":"XIMVA8V","location":"GRD1029C6","expectedCount":1,"wsns":["2RDRIV_L"]},{"tid":"TK-20260731-G01","wid":"XIMVC09","location":"GRD1029C6","expectedCount":1,"wsns":["2RTJH7_D"]},{"tid":"TK-20260731-G01","wid":"XIMWUJ4","location":"GRD1029C6","expectedCount":1,"wsns":["2T1OSP_P"]},{"tid":"TK-20260731-G01","wid":"XIMXTR0","location":"GRD1029C6","expectedCount":1,"wsns":["2RD7OZ_B"]},{"tid":"TK-20260731-G01","wid":"XIMXTY0","location":"GRD1029C6","expectedCount":1,"wsns":["2RDLRC_R"]},{"tid":"TK-20260731-G01","wid":"XIMYD8A","location":"GRD1029C6","expectedCount":1,"wsns":["2S212O_Z"]},{"tid":"TK-20260731-G01","wid":"XIN3I91","location":"GRD1029C6","expectedCount":1,"wsns":["2QYE62_Z"]},{"tid":"TK-20260731-G01","wid":"XIO44MF","location":"GRD1029C6","expectedCount":1,"wsns":["2T2PNQ_R"]},{"tid":"TK-20260731-G01","wid":"XIO491O","location":"GRD1029C6","expectedCount":1,"wsns":["2T8PDM_Z"]},{"tid":"TK-20260731-G01","wid":"XIO4P5A","location":"GRD1029C6","expectedCount":1,"wsns":["2SO926_X"]},{"tid":"TK-20260731-G01","wid":"XIO5E5E","location":"GRD1029C6","expectedCount":1,"wsns":["2SOMY5_J"]},{"tid":"TK-20260731-G01","wid":"XIO5OCG","location":"GRD1029C6","expectedCount":1,"wsns":["2STWNL_J"]},{"tid":"TK-20260731-G01","wid":"XIO4P5A","location":"GRD1029C6","expectedCount":1,"wsns":["2SO926_X"]},{"tid":"TK-20260731-G01","wid":"XIO5E5E","location":"GRD1029C6","expectedCount":1,"wsns":["2SOMY5_J"]},{"tid":"TK-20260731-G01","wid":"XIO5OCG","location":"GRD1029C6","expectedCount":1,"wsns":["2STWNL_J"]},{"tid":"TK-20260731-G01","wid":"XIHH1OT","location":"GRD1029C7","expectedCount":13,"wsns":["2T17BT_P","2TG61X_H","2RN4BD_T","2T80T9_H","2T9MUB_V","2T15BL_Z","2STO6Q_T","2SMQCX_L","2SMMK3_H","2SGUDI_H","2P9KG5_R","2RUD8B_X","2SOBF9_Z"]},{"tid":"TK-20260731-G01","wid":"XIMTS4G","location":"GRD1029C7","expectedCount":1,"wsns":["2SOO36_R"]},{"tid":"TK-20260731-G01","wid":"XIMX6LL","location":"GRD1029C7","expectedCount":1,"wsns":["2SGQNB_X"]},{"tid":"TK-20260731-G01","wid":"XIMYBYA","location":"GRD1029C7","expectedCount":1,"wsns":["1JFH5I_E"]},{"tid":"TK-20260731-G01","wid":"XIN7EVF","location":"GRD1029C7","expectedCount":1,"wsns":["1TIMEP_P"]},{"tid":"TK-20260731-G01","wid":"XIO44UL","location":"GRD1029C7","expectedCount":1,"wsns":["2T8NNJ_F"]},{"tid":"TK-20260731-G01","wid":"XIO48NJ","location":"GRD1029C7","expectedCount":1,"wsns":["2RLTJ3_D"]},{"tid":"TK-20260731-G01","wid":"XIO4U7S","location":"GRD1029C7","expectedCount":1,"wsns":["2T1DZQ_X"]},{"tid":"TK-20260731-G01","wid":"XIO5UVG","location":"GRD1029C7","expectedCount":1,"wsns":["2STPI1_L"]},{"tid":"TK-20260731-G01","wid":"XIPKQJF","location":"GRD1029C7","expectedCount":1,"wsns":["2SOP9E_H"]},{"tid":"TK-20260731-G01","wid":"XIO4U7S","location":"GRD1029C7","expectedCount":1,"wsns":["2T1DZQ_X"]},{"tid":"TK-20260731-G01","wid":"XIO5UVG","location":"GRD1029C7","expectedCount":1,"wsns":["2STPI1_L"]},{"tid":"TK-20260731-G01","wid":"XIPKQJF","location":"GRD1029C7","expectedCount":1,"wsns":["2SOP9E_H"]},{"tid":"TK-20260731-G01","wid":"XIKQA9Y","location":"GRD1029C8","expectedCount":1,"wsns":["2RUNCO_V"]},{"tid":"TK-20260731-G01","wid":"XIMT6EI","location":"GRD1029C8","expectedCount":2,"wsns":["2T1WIB_V","2SU6GQ_V"]},{"tid":"TK-20260731-G01","wid":"XIMU4WK","location":"GRD1029C8","expectedCount":1,"wsns":["2RLU0V_D"]},{"tid":"TK-20260731-G01","wid":"XIMVBZZ","location":"GRD1029C8","expectedCount":1,"wsns":["2R5LOU_F"]},{"tid":"TK-20260731-G01","wid":"XIMWS7Q","location":"GRD1029C8","expectedCount":1,"wsns":["2SUHFI_T"]},{"tid":"TK-20260731-G01","wid":"XIMX3RC","location":"GRD1029C8","expectedCount":1,"wsns":["2T1OEN_B"]},{"tid":"TK-20260731-G01","wid":"XIMXCVK","location":"GRD1029C8","expectedCount":1,"wsns":["2T34RE_P"]},{"tid":"TK-20260731-G01","wid":"XIMYBBU","location":"GRD1029C8","expectedCount":1,"wsns":["2Q0Y4X_F"]},{"tid":"TK-20260731-G01","wid":"XIMYSJU","location":"GRD1029C8","expectedCount":1,"wsns":["2R6314_B"]},{"tid":"TK-20260731-G01","wid":"XIN7TAY","location":"GRD1029C8","expectedCount":1,"wsns":["1T3AIE_J"]},{"tid":"TK-20260731-G01","wid":"XIN981K","location":"GRD1029C8","expectedCount":1,"wsns":["2SNCJD_H"]},{"tid":"TK-20260731-G01","wid":"XIO45US","location":"GRD1029C8","expectedCount":1,"wsns":["2S0GCE_H"]},{"tid":"TK-20260731-G01","wid":"XIO45WW","location":"GRD1029C8","expectedCount":1,"wsns":["2S13S9_X"]},{"tid":"TK-20260731-G01","wid":"XIO48I5","location":"GRD1029C8","expectedCount":1,"wsns":["2S7Z1S_N"]},{"tid":"TK-20260731-G01","wid":"XIO4N82","location":"GRD1029C8","expectedCount":1,"wsns":["2QD48V_F"]},{"tid":"TK-20260731-G01","wid":"XIO4OO4","location":"GRD1029C8","expectedCount":1,"wsns":["2SLIMY_T"]},{"tid":"TK-20260731-G01","wid":"XIO4PYF","location":"GRD1029C8","expectedCount":1,"wsns":["2S26SL_R"]},{"tid":"TK-20260731-G01","wid":"XIO4RGE","location":"GRD1029C8","expectedCount":1,"wsns":["2T2SBZ_H"]},{"tid":"TK-20260731-G01","wid":"XIO4TR6","location":"GRD1029C8","expectedCount":1,"wsns":["2QYPAI_J"]},{"tid":"TK-20260731-G01","wid":"XIO5RH4","location":"GRD1029C8","expectedCount":1,"wsns":["2SMP3H_R"]},{"tid":"TK-20260731-G01","wid":"XIO4OO4","location":"GRD1029C8","expectedCount":1,"wsns":["2SLIMY_T"]},{"tid":"TK-20260731-G01","wid":"XIO4PYF","location":"GRD1029C8","expectedCount":1,"wsns":["2S26SL_R"]},{"tid":"TK-20260731-G01","wid":"XIO4RGE","location":"GRD1029C8","expectedCount":1,"wsns":["2T2SBZ_H"]},{"tid":"TK-20260731-G01","wid":"XIO4TR6","location":"GRD1029C8","expectedCount":1,"wsns":["2QYPAI_J"]},{"tid":"TK-20260731-G01","wid":"XIO5RH4","location":"GRD1029C8","expectedCount":1,"wsns":["2SMP3H_R"]},{"tid":"TK-20260731-G01","wid":"XIN5JTE","location":"GRD1029D1","expectedCount":1,"wsns":["1MDK75_B"]},{"tid":"TK-20260731-G01","wid":"XIN6SXS","location":"GRD1029D3","expectedCount":1,"wsns":["1T2Y0Y_T"]},{"tid":"TK-20260731-G01","wid":"XIN9WL9","location":"GRD1029D3","expectedCount":1,"wsns":["1TIVV6_N"]},{"tid":"TK-20260731-G01","wid":"XIMZHVC","location":"GRD1029D5","expectedCount":1,"wsns":["1J765O_J"]},{"tid":"TK-20260731-G01","wid":"XIN6OUC","location":"GRD1029D5","expectedCount":2,"wsns":["1JI6HN_Z","1JHHL3_G"]},{"tid":"TK-20260731-G01","wid":"XIN6SXS","location":"GRD1029D5","expectedCount":1,"wsns":["1J86KZ_S"]},{"tid":"TK-20260731-G01","wid":"XIN7EVF","location":"GRD1029D5","expectedCount":1,"wsns":["1HSBNQ_B"]},{"tid":"TK-20260731-G01","wid":"XINAHC8","location":"GRD1029D5","expectedCount":1,"wsns":["1J23Q5_J"]},{"tid":"TK-20260731-G01","wid":"XINFCPA","location":"GRD1029D5","expectedCount":1,"wsns":["1J946U_X"]},{"tid":"TK-20260731-G01","wid":"XIMUYO5","location":"GRD1029D6","expectedCount":1,"wsns":["1JHHQ2_T"]},{"tid":"TK-20260731-G01","wid":"XIMYG7S","location":"GRD1029D6","expectedCount":1,"wsns":["1IZQO8_B"]},{"tid":"TK-20260731-G01","wid":"XIMZV1H","location":"GRD1029D6","expectedCount":1,"wsns":["1JE6NS_J"]},{"tid":"TK-20260731-G01","wid":"XIMZV9Z","location":"GRD1029D6","expectedCount":1,"wsns":["1J1GNZ_W"]},{"tid":"TK-20260731-G01","wid":"XIN770L","location":"GRD1029D6","expectedCount":1,"wsns":["1R3DLA_T"]},{"tid":"TK-20260731-G01","wid":"XIN7TAY","location":"GRD1029D6","expectedCount":1,"wsns":["1JI4DU_M"]},{"tid":"TK-20260731-G01","wid":"XINBG85","location":"GRD1029D6","expectedCount":1,"wsns":["1JFFFT_L"]},{"tid":"TK-20260731-G01","wid":"XINE58N","location":"GRD1029D6","expectedCount":1,"wsns":["1J1K3V_X"]},{"tid":"TK-20260731-G01","wid":"XIMX1TA","location":"GRD1029E7","expectedCount":1,"wsns":["1IY4NJ_S"]},{"tid":"TK-20260731-G01","wid":"XIMYDVH","location":"GRD1029E8","expectedCount":1,"wsns":["1KUB0X_J"]},{"tid":"TK-20260731-G01","wid":"XIMYO88","location":"GRD1029E8","expectedCount":1,"wsns":["1KI6E6_J"]},{"tid":"TK-20260731-G01","wid":"XIN6Q4Q","location":"GRD1029E8","expectedCount":1,"wsns":["1JFKK7_S"]}]};
+const EMP_DATA = {"3274824":[{"tid":"TK-20260731-G01","wid":"XIMT7U8","location":"GRD1029B1","expectedCount":1,"wsns":["2RQS7E_P"]},{"tid":"TK-20260731-G01","wid":"XIMYXVX","location":"GRD1029C4","expectedCount":1,"wsns":["1T2H5K_P"]},{"tid":"TK-20260731-G01","wid":"XIN6Y28","location":"GRD1029C4","expectedCount":1,"wsns":["1R364U_N"]},{"tid":"TK-20260731-G01","wid":"XIQJVDL","location":"GRD1029C4","expectedCount":1,"wsns":["2G0NLC_Z"]},{"tid":"TK-20260731-G01","wid":"XIQJVDL","location":"GRD1029C4","expectedCount":1,"wsns":["2G0NLC_Z"]},{"tid":"TK-20260731-G01","wid":"XIJ52WH","location":"GRD1029C5","expectedCount":1,"wsns":["2SNCMH_F"]}],"3876189":[{"tid":"TK-20260731-G02","wid":"XIHH1OT","location":"GRD1041C1","expectedCount":4,"wsns":["2Q0123_P","2S07DE_Z","2S82X0_B","2S1CIR_V"]}]};
 let currentEmp = '';
 let assignments = [];
 let currentIdx = 0;
 let scannedWSNs = [];
 let sessionResults = [];
 let pendingValidatedWSN = '';
+
+let currentPartIdx = 0;
+let qrPayloadParts = [];
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -127,12 +156,33 @@ function doLogin() {
 
   currentEmp = code;
   assignments = EMP_DATA[code];
-  currentIdx = 0;
-  scannedWSNs = [];
-  sessionResults = [];
+
+  // Restore saved session if user reloaded
+  const savedSession = localStorage.getItem('ST_SESSION_' + currentEmp);
+  if (savedSession) {
+    try {
+      const parsed = JSON.parse(savedSession);
+      currentIdx = parsed.currentIdx || 0;
+      scannedWSNs = parsed.scannedWSNs || [];
+      sessionResults = parsed.sessionResults || [];
+    } catch(e) {
+      currentIdx = 0; scannedWSNs = []; sessionResults = [];
+    }
+  } else {
+    currentIdx = 0; scannedWSNs = []; sessionResults = [];
+  }
 
   showScreen('screen-audit');
   loadCurrentItem();
+}
+
+function saveLocalSession() {
+  const dataToSave = {
+    currentIdx: currentIdx,
+    scannedWSNs: scannedWSNs,
+    sessionResults: sessionResults
+  };
+  localStorage.setItem('ST_SESSION_' + currentEmp, JSON.stringify(dataToSave));
 }
 
 function showLoginErr(msg) {
@@ -198,7 +248,9 @@ function confirmWSNStatus(status, remark) {
   const item = assignments[currentIdx];
 
   scannedWSNs.push(wsn);
-  sessionResults.push({ wsn: wsn, status: status, remark: remark });
+  sessionResults.push({ wsn: wsn, status: status, remark: remark, location: item.location });
+
+  saveLocalSession();
 
   const succ = document.getElementById('auditSuccess');
   succ.textContent = (status === 'Done' ? '? Verified: ' : '?? Issue Marked: ') + wsn;
@@ -207,9 +259,18 @@ function confirmWSNStatus(status, remark) {
   pendingValidatedWSN = '';
 
   if (scannedWSNs.length >= item.expectedCount) {
+    const prevLocation = item.location;
     currentIdx++;
     scannedWSNs = [];
-    setTimeout(loadCurrentItem, 600);
+    saveLocalSession();
+
+    // Check if location changed or stock take ended to show Location Summary Pop-up
+    const nextItem = assignments[currentIdx];
+    if (!nextItem || nextItem.location !== prevLocation) {
+      triggerLocationSummaryPopup(prevLocation);
+    } else {
+      setTimeout(loadCurrentItem, 500);
+    }
   } else {
     document.getElementById('dispCount').textContent = scannedWSNs.length + ' / ' + item.expectedCount;
     document.getElementById('wsnInput').value = '';
@@ -217,8 +278,24 @@ function confirmWSNStatus(status, remark) {
   }
 }
 
+function triggerLocationSummaryPopup(locName) {
+  const locResults = sessionResults.filter(r => r.location === locName);
+  const doneCount = locResults.filter(r => r.status === 'Done').length;
+  const issueCount = locResults.filter(r => r.status === 'Issue').length;
+
+  document.getElementById('locModalName').textContent = 'Location: ' + locName;
+  document.getElementById('locModalDone').textContent = doneCount;
+  document.getElementById('locModalIssues').textContent = issueCount;
+  document.getElementById('locationModal').style.display = 'flex';
+}
+
+function closeLocationModal() {
+  document.getElementById('locationModal').style.display = 'none';
+  loadCurrentItem();
+}
+
 function promptIssueForWSN() {
-  const remark = prompt('Describe Issue for WSN ' + pendingValidatedWSN + ':') || 'Battery';
+  const remark = prompt('Describe Issue for WSN ' + pendingValidatedWSN + ':') || 'Damaged / Count Mismatch';
   confirmWSNStatus('Issue', remark);
 }
 
@@ -226,21 +303,64 @@ function renderSummary() {
   showScreen('screen-summary');
 
   const stockTakeId = assignments[0].tid;
-  const payload = currentEmp + '|' + stockTakeId + '|' + sessionResults.map(r => r.wsn + ':' + r.status + ':' + r.remark).join(';');
+  const totalItems = sessionResults.length;
+
+  // Split large payload into parts if items > 40 so QR codes stay small and easily scannable
+  const chunkSize = 40;
+  qrPayloadParts = [];
+  
+  const totalChunks = Math.ceil(totalItems / chunkSize) || 1;
+
+  for (let i = 0; i < totalChunks; i++) {
+    const chunkItems = sessionResults.slice(i * chunkSize, (i + 1) * chunkSize);
+    const recStr = chunkItems.map(r => r.wsn + ':' + r.status + ':' + r.remark).join(';');
+    const partHeader = 'P' + (i + 1) + '/' + totalChunks + '|';
+    qrPayloadParts.push(partHeader + currentEmp + '|' + stockTakeId + '|' + recStr);
+  }
+
+  currentPartIdx = 0;
+  displayQRPart(0);
 
   document.getElementById('summaryDetails').innerHTML = 
     '<strong>Employee:</strong> ' + currentEmp + '<br>' +
     '<strong>Stock Take ID:</strong> ' + stockTakeId + '<br>' +
-    '<strong>Total Items Audited:</strong> ' + sessionResults.length;
+    '<strong>Total Items Audited:</strong> ' + totalItems;
+}
+
+function displayQRPart(index) {
+  currentPartIdx = index;
+  const total = qrPayloadParts.length;
+
+  if (total > 1) {
+    document.getElementById('summaryNotice').textContent = 'Scan Part ' + (index + 1) + ' of ' + total + ' with Supervisor Scanner';
+    document.getElementById('prevPartBtn').style.display = index > 0 ? 'inline-block' : 'none';
+    document.getElementById('nextPartBtn').style.display = index < total - 1 ? 'inline-block' : 'none';
+  } else {
+    document.getElementById('summaryNotice').textContent = 'Scan this 2D Barcode with Supervisor Scanner';
+    document.getElementById('prevPartBtn').style.display = 'none';
+    document.getElementById('nextPartBtn').style.display = 'none';
+  }
 
   const qrel = document.getElementById("qrcode");
   qrel.innerHTML = "";
   new QRCode(qrel, {
-    text: payload,
-    width: 240,
-    height: 240,
+    text: qrPayloadParts[index],
+    width: 230,
+    height: 230,
     correctLevel: QRCode.CorrectLevel.L
   });
+}
+
+function changePart(dir) {
+  const newIdx = currentPartIdx + dir;
+  if (newIdx >= 0 && newIdx < qrPayloadParts.length) {
+    displayQRPart(newIdx);
+  }
+}
+
+function clearLocalSessionAndReset() {
+  localStorage.removeItem('ST_SESSION_' + currentEmp);
+  location.reload();
 }
 
 document.getElementById('empInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
