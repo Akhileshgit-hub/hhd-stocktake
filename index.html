@@ -44,7 +44,7 @@
     </div>
     <div class="alert alert-error" id="loginAlert" style="margin-top:12px;"></div>
     <button class="btn btn-primary" style="margin-top:16px;" onclick="doLogin()">Start Audit</button>
-    <p style="font-size:11px; color:#8888aa; margin-top:16px;">Published: 1/8/2026, 11:06:26 am</p>
+    <p style="font-size:11px; color:#8888aa; margin-top:16px;">Published: 1/8/2026, 11:19:16 am</p>
   </div>
 </div>
 
@@ -304,8 +304,8 @@ function renderSummary() {
   const stockTakeId = assignments[0].tid;
   const totalItems = sessionResults.length;
 
-  // Ultra-compact chunking limit (50 WSNs per QR max) to guarantee large scannable modules
-  const chunkSize = 50;
+  // Ultra-compact chunking limit (60 WSNs per QR max) to guarantee large scannable modules
+  const chunkSize = 60;
   qrPayloadParts = [];
   
   const totalChunks = Math.ceil(totalItems / chunkSize) || 1;
